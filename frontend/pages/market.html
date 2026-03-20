@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokemon Trader - Card Market</title>
+</head>
+<body>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="packs.html">Buy Packs</a>
+    <a href="collection.html">My Collection</a>
+    <a href="login.html">Logout</a>
+  </nav>
+
+  <main>
+    <h1>Card Market</h1>
+    <p>Balance: <span id="user-balance">0</span> coins</p>
+
+    <div id="filters">
+      <input type="text" id="search" placeholder="Search cards..."/>
+      <select id="filter-type">
+        <option value="">All Types</option>
+      </select>
+      <select id="filter-rarity">
+        <option value="">All Rarities</option>
+      </select>
+      <select id="sort-by">
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+
+    <section id="listings-grid">
+      <!-- Listings populated by JS -->
+    </section>
+
+    <!-- Sell card modal -->
+    <dialog id="sell-modal">
+      <h2>List a Card for Sale</h2>
+      <form id="sell-form">
+        <label for="sell-card">Select Card</label>
+        <select id="sell-card"></select>
+
+        <label for="sell-price">Price (coins)</label>
+        <input type="number" id="sell-price" min="1" required/>
+
+        <button type="submit">List Card</button>
+        <button type="button" id="close-sell-modal">Cancel</button>
+      </form>
+    </dialog>
+
+    <button id="open-sell-modal">Sell a Card</button>
+  </main>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

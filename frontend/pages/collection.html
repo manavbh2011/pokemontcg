@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokemon Trader - My Collection</title>
+</head>
+<body>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="market.html">Market</a>
+    <a href="packs.html">Buy Packs</a>
+    <a href="login.html">Logout</a>
+  </nav>
+
+  <main id="collection-main">
+    <!-- Access denied message shown by JS if not logged in -->
+    <div id="access-denied" style="display:none;">
+      <p>You must be logged in to view this page. <a href="login.html">Login</a></p>
+    </div>
+
+    <div id="collection-content">
+      <h1>My Collection</h1>
+
+      <div id="filters">
+        <input type="text" id="search" placeholder="Search cards..."/>
+        <select id="filter-type">
+          <option value="">All Types</option>
+        </select>
+        <select id="filter-rarity">
+          <option value="">All Rarities</option>
+        </select>
+      </div>
+
+      <section id="collection-grid">
+        <!-- Cards populated by JS -->
+      </section>
+    </div>
+  </main>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>

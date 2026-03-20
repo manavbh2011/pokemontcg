@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pokemon Trader - Buy Packs</title>
+</head>
+<body>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="market.html">Market</a>
+    <a href="collection.html">My Collection</a>
+    <a href="login.html">Logout</a>
+  </nav>
+
+  <main>
+    <h1>Buy Packs</h1>
+    <p>Balance: <span id="user-balance">0</span> coins</p>
+
+    <section id="packs-grid">
+      <!-- Packs populated by JS -->
+    </section>
+
+    <!-- Pack opening modal -->
+    <dialog id="pack-open-modal">
+      <h2>You got these cards!</h2>
+      <div id="pack-results"></div>
+      <button id="close-modal">Close</button>
+    </dialog>
+  </main>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
