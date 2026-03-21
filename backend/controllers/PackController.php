@@ -1,0 +1,64 @@
+<?php
+require_once __DIR__ . '/../models/Pack.php';
+require_once __DIR__ . '/../models/User.php';
+
+class PackController {
+    private $packModel;
+    private $userModel;
+    private $pdo;
+
+    public function __construct($pdo) {
+        $this->pdo       = $pdo;
+        $this->packModel = new Pack($pdo);
+        $this->userModel = new User($pdo);
+    }
+
+    public function getAvailablePacks() {
+        return $this->packModel->getAvailablePackTypes();
+    }
+
+    public function buyPack($packTypeName) {
+        if (!isset($_SESSION['username'])) {
+            http_response_code(401);
+            return ["error" => "Not logged in"];
+        }
+
+        $username = $_SESSION['username'];
+        $stmt = $this->pdo->prepare("SELECT * FROM pack_type WHERE pack_type_name = ?");
+        $stmt->execute([$packTypeName]);
+        $packType = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+
+        if (!$packType) {
+            http_response_code(404);
+            return ["error" => "Pack type not found"];
+        }
+
+        $packId = $this->packModel->getAvailablePack($packTypeName);
+        if (!$packId) {
+            http_response_code(409);
+            return ["error" => "No packs of this type available"];
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $deducted = $this->userModel->deductBalance($username, $packType['pack_price']);
+            if (!$deducted) {
+                $this->pdo->rollBack();
+                http_response_code(402);
+                return ["error" => "Insufficient balance"];
+            }
+
+            $this->packModel->recordPurchase($packId, $username);
+            $this->packModel->assignCardsToUser($packId, $username);
+            $cards = $this->packModel->getPackCards($packId);
+
+            $this->pdo->commit();
+            return ["pack_id" => $packId, "cards" => $cards];
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            http_response_code(500);
+            return ["error" => $e->getMessage()];
+        }
+    }
+}
