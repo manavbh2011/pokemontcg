@@ -24,7 +24,7 @@ class PackController {
         }
 
         $username = $_SESSION['username'];
-        $stmt = $this->pdo->prepare("SELECT * FROM pack_type WHERE pack_type_name = ?");
+        $stmt = $this->pdo->prepare("SELECT * FROM pack_type WHERE pack_type_id = ?");
         $stmt->execute([$packTypeName]);
         $packType = $stmt->fetch(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
@@ -50,8 +50,7 @@ class PackController {
             }
 
             $this->packModel->recordPurchase($packId, $username);
-            $this->packModel->assignCardsToUser($packId, $username);
-            $cards = $this->packModel->getPackCards($packId);
+            $cards = $this->packModel->fetchAndStoreCards($packType['pack_type_id'], $packId, $username);
 
             $this->pdo->commit();
             return ["pack_id" => $packId, "cards" => $cards];
