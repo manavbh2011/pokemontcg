@@ -5,59 +5,123 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pokemon Trader - My Collection</title>
-  <link rel="stylesheet" href="../styles.css" />
+
+  <!-- TCGdex SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@tcgdex/sdk@2/dist/tcgdex.browser.global.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+      padding: 16px;
+      background: #020617;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    main {
+      padding: 24px;
+    }
+
+    #collection-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .card h3 {
+      margin: 10px 0 5px;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+  </style>
 </head>
 
 <body>
-  <header class="site-header">
-    <div class="nav-shell">
-      <a class="brand" href="../index.html">
-        <span class="brand-mark"></span>
-        <span>Pokemon Trader</span>
-      </a>
-      <nav class="nav-links">
-        <a href="../index.html">Home</a>
-        <a href="market.html">Market</a>
-        <a href="packs.html">Packs</a>
-        <a class="active" href="collection.html">Collection</a>
-        <a href="login.html">Logout</a>
-      </nav>
-    </div>
-  </header>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="market.html">Market</a>
+    <a href="packs.html">Buy Packs</a>
+  </nav>
 
-  <main class="page" id="collection-main">
-    <div id="access-denied" style="display:none;">
-      <p>You must be logged in to view this page. <a href="login.html">Login</a></p>
-    </div>
+  <main>
+    <h1>My Collection</h1>
 
-    <section class="panel section-card collection-controls" id="collection-content">
-      <span class="eyebrow">Your vault</span>
-      <h1>My Collection</h1>
-      <p class="muted">Search and filter cards without the page feeling cluttered.</p>
-
-      <div id="filters">
-        <input type="text" id="search" placeholder="Search cards..." />
-        <select id="filter-type">
-          <option value="">All Types</option>
-        </select>
-        <select id="filter-rarity">
-          <option value="">All Rarities</option>
-        </select>
-      </div>
-
-      <section id="collection-grid">
-        <article class="card-shell">
-          <div class="card-image">Your collected cards will appear here</div>
-          <div>
-            <h3>Collection Preview</h3>
-            <div class="card-meta"><span class="tag">Preview</span><span>Ready for JS data</span></div>
-          </div>
-        </article>
-      </section>
+    <section id="collection-grid">
+      <!-- Cards will be inserted here -->
     </section>
   </main>
 
-  <script src="../js/main.js"></script>
+  <script>
+    const tcgdex = new TCGdex('en');
+
+    function createCardHTML(card) {
+      return `
+        <div class="card">
+          <img src="${card.getImageURL('low', 'webp')}" alt="${card.name}">
+          <h3>${card.name}</h3>
+          <p>${card.rarity || 'Unknown rarity'}</p>
+        </div>
+      `;
+    }
+
+    async function loadStaticCards() {
+      const grid = document.getElementById("collection-grid");
+
+      // Hardcoded card IDs (your "static collection")
+      const cardIds = [
+        "swsh7-30",
+        "sm12-228",
+        "xy8-161",
+        "sm12-261",
+        "swsh3.5-76",
+        "sm11-235",
+        "sv10-193",
+        "swsh7-41"
+      ];
+
+      const cards = await Promise.all(
+        cardIds.map(id => tcgdex.card.get(id))
+      );
+
+      grid.innerHTML = cards.map(createCardHTML).join("");
+    }
+
+    document.addEventListener("DOMContentLoaded", loadStaticCards);
+  </script>
 </body>
 
 </html>
