@@ -1,58 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pokemon Trader - Card Market</title>
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
+
 <body>
-  <nav>
-    <a href="../index.html">Home</a>
-    <a href="packs.html">Buy Packs</a>
-    <a href="collection.html">My Collection</a>
-    <a href="login.html">Logout</a>
-  </nav>
-
-  <main>
-    <h1>Card Market</h1>
-    <p>Balance: <span id="user-balance">0</span> coins</p>
-
-    <div id="filters">
-      <input type="text" id="search" placeholder="Search cards..."/>
-      <select id="filter-type">
-        <option value="">All Types</option>
-      </select>
-      <select id="filter-rarity">
-        <option value="">All Rarities</option>
-      </select>
-      <select id="sort-by">
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
-      </select>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="packs.html">Packs</a>
+        <a href="collection.html">Collection</a>
+        <a class="active" href="market.html">Market</a>
+        <a href="login.html">Logout</a>
+      </nav>
     </div>
+  </header>
 
-    <section id="listings-grid">
-      <!-- Listings populated by JS -->
+  <main class="page">
+    <section class="panel section-card">
+      <div class="balance-bar">
+        <div>
+          <span class="eyebrow">Trading floor</span>
+          <h1>Card Market</h1>
+          <p class="muted">Browse listings, filter by rarity, and post cards for sale.</p>
+        </div>
+        <div class="balance-pill">Coins: <span id="user-balance">0</span></div>
+      </div>
+
+      <div id="filters" class="controls">
+        <input type="text" id="search" placeholder="Search cards..." />
+        <select id="filter-type">
+          <option value="">All Types</option>
+        </select>
+        <select id="filter-rarity">
+          <option value="">All Rarities</option>
+        </select>
+        <select id="sort-by">
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+      </div>
+
+      <section id="listings-grid">
+        <article class="card-shell">
+          <div class="card-image">Market listings will appear here</div>
+          <div>
+            <h3>Featured Listing</h3>
+            <div class="card-meta"><span class="tag">Preview</span><span>0 coins</span></div>
+          </div>
+        </article>
+      </section>
+
+      <div class="cta-row">
+        <button id="open-sell-modal">Sell a Card</button>
+      </div>
     </section>
 
-    <!-- Sell card modal -->
     <dialog id="sell-modal">
-      <h2>List a Card for Sale</h2>
-      <form id="sell-form">
-        <label for="sell-card">Select Card</label>
-        <select id="sell-card"></select>
+      <div class="dialog-body">
+        <h2>List a Card for Sale</h2>
+        <form id="sell-form">
+          <label for="sell-card">Select Card</label>
+          <select id="sell-card"></select>
 
-        <label for="sell-price">Price (coins)</label>
-        <input type="number" id="sell-price" min="1" required/>
+          <label for="sell-price">Price (coins)</label>
+          <input type="number" id="sell-price" min="1" required />
 
-        <button type="submit">List Card</button>
-        <button type="button" id="close-sell-modal">Cancel</button>
-      </form>
+          <div class="dialog-actions">
+            <button type="submit">List Card</button>
+            <button type="button" class="button-secondary" id="close-sell-modal">Cancel</button>
+          </div>
+        </form>
+      </div>
     </dialog>
-
-    <button id="open-sell-modal">Sell a Card</button>
   </main>
 
-  <script src="../js/main.js"></script>
+  <script src="main.js"></script>
 </body>
+
 </html>

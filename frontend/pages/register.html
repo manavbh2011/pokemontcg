@@ -1,32 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pokemon Trader - Register</title>
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
+
 <body>
-  <nav>
-    <a href="../index.html">Home</a>
-  </nav>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="login.html">Login</a>
+        <a class="active" href="register.html">Register</a>
+      </nav>
+    </div>
+  </header>
 
-  <main>
-    <h1>Register</h1>
-    <form id="register-form">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required/>
+  <main class="page form-wrap">
+    <section class="panel form-card">
+      <span class="eyebrow">Create your trainer account</span>
+      <h1>Register</h1>
+      <p class="helper-text">Start opening packs, collecting cards, and trading with other players.</p>
+      <form id="register-form">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Choose a username" required />
 
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required/>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required />
 
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required/>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Create a password" required />
 
-      <button type="submit">Register</button>
-    </form>
-    <p>Already have an account? <a href="login.html">Login</a></p>
+        <button type="submit">Create account</button>
+      </form>
+      <p class="helper-text">Already have an account? <a href="login.html">Login</a></p>
+    </section>
   </main>
 
   <script src="../js/main.js"></script>
 </body>
+
 </html>

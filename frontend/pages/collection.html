@@ -1,29 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pokemon Trader - My Collection</title>
-</head>
-<body>
-  <nav>
-    <a href="../index.html">Home</a>
-    <a href="market.html">Market</a>
-    <a href="packs.html">Buy Packs</a>
-    <a href="login.html">Logout</a>
-  </nav>
 
-  <main id="collection-main">
-    <!-- Access denied message shown by JS if not logged in -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokemon Trader - My Collection</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="market.html">Market</a>
+        <a href="packs.html">Packs</a>
+        <a class="active" href="collection.html">Collection</a>
+        <a href="login.html">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page" id="collection-main">
     <div id="access-denied" style="display:none;">
       <p>You must be logged in to view this page. <a href="login.html">Login</a></p>
     </div>
 
-    <div id="collection-content">
+    <section class="panel section-card collection-controls" id="collection-content">
+      <span class="eyebrow">Your vault</span>
       <h1>My Collection</h1>
+      <p class="muted">Search and filter cards without the page feeling cluttered.</p>
 
       <div id="filters">
-        <input type="text" id="search" placeholder="Search cards..."/>
+        <input type="text" id="search" placeholder="Search cards..." />
         <select id="filter-type">
           <option value="">All Types</option>
         </select>
@@ -33,11 +46,18 @@
       </div>
 
       <section id="collection-grid">
-        <!-- Cards populated by JS -->
+        <article class="card-shell">
+          <div class="card-image">Your collected cards will appear here</div>
+          <div>
+            <h3>Collection Preview</h3>
+            <div class="card-meta"><span class="tag">Preview</span><span>Ready for JS data</span></div>
+          </div>
+        </article>
       </section>
-    </div>
+    </section>
   </main>
 
   <script src="../js/main.js"></script>
 </body>
+
 </html>

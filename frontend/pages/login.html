@@ -1,29 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pokemon Trader - Login</title>
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
+
 <body>
-  <nav>
-    <a href="../index.html">Home</a>
-  </nav>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a class="active" href="login.html">Login</a>
+        <a href="register.html">Register</a>
+      </nav>
+    </div>
+  </header>
 
-  <main>
-    <h1>Login</h1>
-    <form id="login-form">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" required/>
+  <main class="page form-wrap">
+    <section class="panel form-card">
+      <span class="eyebrow">Welcome back, trainer</span>
+      <h1>Login</h1>
+      <p class="helper-text">Jump back into the market, open new packs, and manage your collection.</p>
+      <form id="login-form">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required />
 
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required/>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required />
 
-      <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="register.html">Register</a></p>
+        <button type="submit">Login</button>
+      </form>
+      <p class="helper-text">Don't have an account? <a href="register.html">Register</a></p>
+    </section>
   </main>
 
   <script src="../js/main.js"></script>
 </body>
+
 </html>
