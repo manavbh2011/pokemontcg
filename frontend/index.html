@@ -1,22 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pokemon Trader - Home</title>
-</head>
-<body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="pages/login.html">Login</a>
-    <a href="pages/market.html">Market</a>
-    <a href="pages/packs.html">Buy Packs</a>
-  </nav>
 
-  <main>
-    <h1>Welcome to Pokemon Trader</h1>
-    <p>Buy packs, collect cards, and trade with other trainers.</p>
-    <a href="pages/login.html">Get Started</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokemon Trader - Home</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a class="active" href="index.html">Home</a>
+        <a href="pages/login.html">Login</a>
+        <a href="pages/market.html">Market</a>
+        <a href="pages/packs.html">Packs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div class="panel hero-copy">
+        <span class="eyebrow">Open packs. Build your flex. Trade smart.</span>
+        <h1>Catch the thrill of a pack opening, then flip your best pulls on the market.</h1>
+        <p class="lead">
+          Build a collection, show off your rarest cards, buy from other trainers, and create a pack-opening experience
+          that feels exciting instead of plain.
+        </p>
+        <div class="cta-row">
+          <a class="button button-primary" href="pages/login.html">Start collecting</a>
+          <a class="button button-secondary" href="pages/packs.html">View packs</a>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <strong>Live Market</strong>
+            <span>Buy and sell cards with clean sorting and filters.</span>
+          </div>
+          <div class="stat">
+            <strong>Pack Reveals</strong>
+            <span>Make every opening feel dramatic and rewarding.</span>
+          </div>
+          <div class="stat">
+            <strong>Trainer Profiles</strong>
+            <span>Showcase your collection and favorite pulls.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel hero-side">
+        <div class="promo-stack">
+          <div class="promo-card">
+            <h2>Rare pull energy</h2>
+            <p class="muted">Give your pack opening page a glowing, game-like feel with strong cards, modal reveals, and
+              better spacing.</p>
+          </div>
+          <div class="promo-card">
+            <h2>Clean collection UX</h2>
+            <p class="muted">Search, filter, and browse cards in a layout that feels more like a real trading platform.
+            </p>
+          </div>
+          <div class="promo-card">
+            <h2>Built to scale</h2>
+            <p class="muted">This styling works even before your dynamic card content is fully wired up.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-grid">
+      <article class="panel section-card">
+        <h2>Open packs</h2>
+        <p class="muted">Feature your pack choices in a responsive grid with room for art, price, and rarity odds.</p>
+      </article>
+      <article class="panel section-card">
+        <h2>Trade cards</h2>
+        <p class="muted">Highlight balance, active listings, and seller actions without the page feeling crowded.</p>
+      </article>
+      <article class="panel section-card">
+        <h2>Showcase pulls</h2>
+        <p class="muted">Let trainers display favorites in a profile that feels worth sharing.</p>
+      </article>
+    </section>
+
+    <p class="footer-note">A sharper UI will make the pack-opening moment feel much more addictive.</p>
   </main>
 </body>
+
 </html>

@@ -1,32 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pokemon Trader - User Profile</title>
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
+
 <body>
-  <nav>
-    <a href="../index.html">Home</a>
-    <a href="market.html">Market</a>
-    <a href="packs.html">Buy Packs</a>
-    <a href="login.html">Logout</a>
-  </nav>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="market.html">Market</a>
+        <a href="packs.html">Packs</a>
+        <a class="active" href="user.html">Profile</a>
+        <a href="login.html">Logout</a>
+      </nav>
+    </div>
+  </header>
 
-  <main>
-    <section id="profile">
-      <img id="user-avatar" src="" alt="User Avatar"/>
-      <h1 id="username">Username</h1>
-      <p id="user-bio">Bio goes here.</p>
-      <p>Joined: <span id="join-date"></span></p>
-    </section>
+  <main class="page">
+    <div class="profile-layout">
+      <section class="panel profile-card" id="profile">
+        <img id="user-avatar" src="" alt="User Avatar" />
+        <div>
+          <span class="eyebrow">Trainer profile</span>
+          <h1 id="username">Username</h1>
+          <p class="muted" id="user-bio">Bio goes here.</p>
+          <p class="muted">Joined: <span id="join-date"></span></p>
+        </div>
+      </section>
 
-    <section>
-      <h2>Links</h2>
-      <a id="showcase-link" href="showcase.html">View Card Showcase</a>
-    </section>
+      <section class="panel link-card">
+        <h2>Links</h2>
+        <p class="muted">Jump into this trainer's featured cards and public collection moments.</p>
+        <div class="cta-row">
+          <a class="button button-primary" id="showcase-link" href="showcase.html">View Card Showcase</a>
+        </div>
+      </section>
+    </div>
   </main>
 
   <script src="../js/main.js"></script>
 </body>
+
 </html>

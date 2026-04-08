@@ -1,34 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pokemon Trader - Buy Packs</title>
+  <link rel="stylesheet" href="../css/styles.css" />
 </head>
+
 <body>
-  <nav>
-    <a href="../index.html">Home</a>
-    <a href="market.html">Market</a>
-    <a href="collection.html">My Collection</a>
-    <a href="login.html">Logout</a>
-  </nav>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a class="active" href="packs.html">Packs</a>
+        <a href="market.html">Market</a>
+        <a href="collection.html">Collection</a>
+        <a href="login.html">Logout</a>
+      </nav>
+    </div>
+  </header>
 
-  <main>
-    <h1>Buy Packs</h1>
-    <p>Balance: <span id="user-balance">0</span> coins</p>
+  <main class="page">
+    <section class="panel section-card">
+      <div class="balance-bar">
+        <div>
+          <span class="eyebrow">Rip into a new pack</span>
+          <h1>Buy Packs</h1>
+          <p class="muted">Turn pack opening into the centerpiece of the site with better spacing, stronger cards, and a
+            more dramatic reveal modal.</p>
+        </div>
+        <div class="balance-pill">Coins: <span id="user-balance">0</span></div>
+      </div>
 
-    <section id="packs-grid">
-      <!-- Packs populated by JS -->
+      <section id="packs-grid">
+        <article class="card-shell">
+          <div class="card-image">Available packs will appear here</div>
+          <div>
+            <h3>Starter Pack</h3>
+            <div class="card-meta"><span class="tag">Preview</span><span>See price in app</span></div>
+          </div>
+        </article>
+      </section>
     </section>
 
-    <!-- Pack opening modal -->
     <dialog id="pack-open-modal">
-      <h2>You got these cards!</h2>
-      <div id="pack-results"></div>
-      <button id="close-modal">Close</button>
+      <div class="dialog-body">
+        <h2>You got these cards!</h2>
+        <div id="pack-results">
+          <article class="card-shell">
+            <div class="card-image">Pack results appear here</div>
+            <div class="card-meta"><span class="tag">Reveal</span><span>Nice pull</span></div>
+          </article>
+        </div>
+        <div class="dialog-actions">
+          <button id="close-modal">Close</button>
+        </div>
+      </div>
     </dialog>
   </main>
 
   <script src="../js/main.js"></script>
 </body>
+
 </html>
