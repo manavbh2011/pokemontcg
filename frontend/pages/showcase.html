@@ -33,18 +33,25 @@
       <h1><span id="showcase-username">User</span>'s Card Showcase</h1>
       <p class="muted" id="showcase-description">Featured cards chosen by this trainer.</p>
 
-      <section id="showcase-grid">
-        <article class="card-shell">
-          <div class="card-image">Showcase cards will appear here</div>
-          <div>
-            <h3>Favorite Pull</h3>
-            <div class="card-meta"><span class="tag">Showcase</span><span>Trainer pick</span></div>
-          </div>
-        </article>
-      </section>
+      <section id="showcase-grid"></section>
+
+      <div class="cta-row">
+        <button onclick="openAddToShowcaseModal()">Add Card</button>
+      </div>
     </section>
+
+    <dialog id="add-to-showcase-modal">
+      <div class="dialog-body">
+        <h2>Pick a card from your collection</h2>
+        <div id="showcase-card-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;max-height:60vh;overflow-y:auto;"></div>
+        <div class="dialog-actions">
+          <button type="button" class="button-secondary" onclick="$(&#39;add-to-showcase-modal&#39;).close()">Cancel</button>
+        </div>
+      </div>
+    </dialog>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@tcgdex/sdk@2/dist/tcgdex.browser.global.min.js"></script>
   <script src="../js/config.js"></script>
   <script src="../js/main.js"></script>
 </body>

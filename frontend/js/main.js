@@ -149,7 +149,89 @@ async function loadShowcase() {
   const data = await fetchData(`showcase.php?username=${username}`);
   if (!data) return;
 
-  grid.innerHTML = data.flatMap(s => s.cards).map(createCardHTML).join("");
+  const tcgdex = new TCGdex('en');
+  const cards = data.flatMap(s => s.cards);
+
+  if (!cards.length) {
+    grid.innerHTML = '<p class="muted">No cards in your showcase yet.</p>';
+    return;
+  }
+
+  const withImages = await Promise.all(cards.map(async c => {
+    const card = await tcgdex.card.get(c.card_info_id);
+    return { ...c, imageURL: card?.getImageURL('low', 'webp') ?? '' };
+  }));
+
+  grid.innerHTML = withImages.map(c => `
+    <div class="card-shell">
+      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
+      <div style="margin-top:auto;">
+        <h3>${c.card_name}</h3>
+        <p class="muted">${c.type} · ${c.level}</p>
+        <button onclick="removeFromShowcase(${c.card_id})">Remove</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function removeFromShowcase(cardId) {
+  const username = localStorage.getItem("username");
+  await fetchData("showcase.php?action=remove", {
+    method: "POST",
+    body: JSON.stringify({ username, card_id: cardId })
+  });
+  loadShowcase();
+}
+
+async function openAddToShowcaseModal() {
+  const username = localStorage.getItem("username");
+  const [collectionData, showcaseData] = await Promise.all([
+    fetchData(`cards.php?username=${username}`),
+    fetchData(`showcase.php?username=${username}`)
+  ]);
+  const list = $("showcase-card-list");
+  if (!collectionData || !list) return;
+
+  const showcaseCardIds = new Set(
+    (showcaseData || []).flatMap(s => s.cards.map(c => c.card_id))
+  );
+
+  const available = collectionData.filter(c => !showcaseCardIds.has(c.card_id));
+
+  if (!available.length) {
+    list.innerHTML = '<p class="muted">All your cards are already in your showcase.</p>';
+    $("add-to-showcase-modal").showModal();
+    return;
+  }
+
+  const tcgdex = new TCGdex('en');
+  const withImages = await Promise.all(available.map(async c => {
+    const card = await tcgdex.card.get(c.card_info_id);
+    return { ...c, imageURL: card?.getImageURL('low', 'webp') ?? '' };
+  }));
+
+  list.innerHTML = withImages.map(c => `
+    <div class="card-shell" style="cursor:pointer;" onclick="addToShowcase(${c.card_id})">
+      <img src="${c.imageURL}" alt="${c.card_name}" style="border-radius:12px;" />
+      <div><h3>${c.card_name}</h3><p class="muted">${c.type} · ${c.level}</p></div>
+    </div>
+  `).join("");
+
+  $("add-to-showcase-modal").showModal();
+}
+
+async function addToShowcase(cardId) {
+  const username = localStorage.getItem("username");
+  const res = await fetchData("showcase.php?action=add", {
+    method: "POST",
+    body: JSON.stringify({ username, card_id: cardId })
+  });
+  if (res?.success) {
+    $("add-to-showcase-modal").close();
+    loadShowcase();
+  } else {
+    alert("Failed to add card: " + (res?.error ?? "Unknown error"));
+  }
 }
 
 // ---------- PACKS ----------

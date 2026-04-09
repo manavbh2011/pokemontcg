@@ -9,11 +9,14 @@ class CardController {
     }
 
     public function getCollection($requestedUser) {
-        if (!isset($_SESSION['username']) || $_SESSION['username'] !== $requestedUser) {
+        if (!isset($_SESSION['username'])) {
+            http_response_code(401);
+            return ["error" => "Not logged in"];
+        }
+        if ($_SESSION['username'] !== $requestedUser) {
             http_response_code(403);
             return ["error" => "Unauthorized"];
         }
-
         return $this->cardModel->getCollectionByUser($requestedUser);
     }
 }
