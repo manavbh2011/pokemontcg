@@ -267,12 +267,30 @@ async function openPack(packTypeId) {
     body: JSON.stringify({ pack_type_id: packTypeId })
   });
 
-  if (!res) return;
+  if (!res || res.error) {
+    alert(res?.error ?? "Failed to open pack");
+    return;
+  }
 
   const modal = $("pack-open-modal");
   const results = $("pack-results");
 
-  results.innerHTML = res.cards.map(createCardHTML).join("");
+  const tcgdex = new TCGdex('en');
+  const withImages = await Promise.all(res.cards.map(async c => {
+    const card = await tcgdex.card.get(c.card_info_id);
+    return { ...c, imageURL: card?.getImageURL('low', 'webp') ?? '' };
+  }));
+
+  results.innerHTML = withImages.map(c => `
+    <div class="card-shell">
+      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
+      <div>
+        <h3>${c.card_name}</h3>
+        <p class="muted">${c.type} · ${c.level}</p>
+      </div>
+    </div>
+  `).join("");
+
   modal.showModal();
 }
 
@@ -311,6 +329,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const showcaseUsername = $("showcase-username");
   if (showcaseUsername) showcaseUsername.textContent = localStorage.getItem("name") ?? "User";
+
+  const closeModal = $("close-modal");
+  if (closeModal) closeModal.onclick = () => $("pack-open-modal").close();
 
   handleLogin();
   handleRegister();
