@@ -16,7 +16,7 @@ class Pack {
     public function getAvailablePack($packTypeId) {
         $stmt = $this->pdo->prepare("
             SELECT p.pack_id FROM pack p
-            JOIN pack_type pt ON p.pack_type_name = pt.pack_type_name
+            JOIN pack_type pt ON p.pack_type_id = pt.pack_type_id
             LEFT JOIN buys_pack bp ON p.pack_id = bp.pack_id
             WHERE pt.pack_type_id = ? AND bp.pack_id IS NULL
             LIMIT 1

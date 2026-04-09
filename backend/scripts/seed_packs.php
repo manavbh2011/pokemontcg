@@ -36,8 +36,8 @@ foreach ($sets as $set) {
         $stmt->execute([$packTypeId, $packTypeName, $description]);
         $stmt->closeCursor();
 
-        $stmt = $pdo->prepare("INSERT INTO pack (pack_type_name) VALUES (?)");
-        $stmt->execute([$packTypeName]);
+        $stmt = $pdo->prepare("INSERT INTO pack (pack_type_id) VALUES (?)");
+        $stmt->execute([$packTypeId]);
         $stmt->closeCursor();
 
         $pdo->commit();
