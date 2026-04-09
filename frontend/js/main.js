@@ -118,10 +118,23 @@ async function loadCollection() {
   const grid = $("collection-grid");
   if (!grid) return;
 
-  const data = await fetchData("collection.php");
-  if (!data) return;
+  const tcgdex = new TCGdex('en');
+  const cardIds = [
+    "swsh7-30", "sm12-228", "xy8-161", "sm12-261",
+    "swsh3.5-76", "sm11-235", "sv10-193", "swsh7-41"
+  ];
 
-  grid.innerHTML = data.map(createCardHTML).join("");
+  const cards = await Promise.all(cardIds.map(id => tcgdex.card.get(id)));
+
+  grid.innerHTML = cards.map(card => `
+    <div class="card-shell">
+      <img src="${card.getImageURL('low', 'webp')}" alt="${card.name}" style="border-radius:12px;" />
+      <div>
+        <h3>${card.name}</h3>
+        <p class="muted">${card.rarity || 'Unknown rarity'}</p>
+      </div>
+    </div>
+  `).join("");
 }
 
 // ---------- SHOWCASE ----------
