@@ -45,7 +45,9 @@ async function handleLogin() {
       body: JSON.stringify(data)
     });
 
-    if (res?.success) {
+    if (res?.username) {
+      localStorage.setItem("balance", res.balance);
+      localStorage.setItem("username", res.username);
       window.location.href = "market.html";
     } else {
       alert("Login failed");
@@ -188,6 +190,9 @@ function setupSellModal() {
 
 // ---------- INIT ----------
 document.addEventListener("DOMContentLoaded", () => {
+  const balanceEl = $("user-balance");
+  if (balanceEl) balanceEl.textContent = localStorage.getItem("balance") ?? 0;
+
   handleLogin();
   handleRegister();
 
