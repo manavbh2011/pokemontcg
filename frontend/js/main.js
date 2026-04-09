@@ -119,20 +119,27 @@ async function loadCollection() {
   const grid = $("collection-grid");
   if (!grid) return;
 
+  const username = localStorage.getItem("username");
+  if (!username) return;
+
+  const data = await fetchData(`cards.php?username=${username}`);
+  if (!data || data.error) {
+    grid.innerHTML = '<p class="muted">No cards in your collection yet.</p>';
+    return;
+  }
+
   const tcgdex = new TCGdex('en');
-  const cardIds = [
-    "swsh7-30", "sm12-228", "xy8-161", "sm12-261",
-    "swsh3.5-76", "sm11-235", "sv10-193", "swsh7-41"
-  ];
+  const withImages = await Promise.all(data.map(async c => {
+    const card = await tcgdex.card.get(c.card_info_id);
+    return { ...c, imageURL: card?.getImageURL('low', 'webp') ?? '' };
+  }));
 
-  const cards = await Promise.all(cardIds.map(id => tcgdex.card.get(id)));
-
-  grid.innerHTML = cards.map(card => `
+  grid.innerHTML = withImages.map(c => `
     <div class="card-shell">
-      <img src="${card.getImageURL('low', 'webp')}" alt="${card.name}" style="border-radius:12px;" />
+      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
       <div>
-        <h3>${card.name}</h3>
-        <p class="muted">${card.rarity || 'Unknown rarity'}</p>
+        <h3>${c.card_name}</h3>
+        <p class="muted">${c.type} · ${c.level}</p>
       </div>
     </div>
   `).join("");
