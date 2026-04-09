@@ -48,6 +48,7 @@ async function handleLogin() {
     if (res?.username) {
       localStorage.setItem("balance", res.balance);
       localStorage.setItem("username", res.username);
+      localStorage.setItem("name", res.name);
       window.location.href = "market.html";
     } else {
       alert("Login failed");
@@ -142,10 +143,13 @@ async function loadShowcase() {
   const grid = $("showcase-grid");
   if (!grid) return;
 
-  const data = await fetchData("showcase.php");
+  const username = localStorage.getItem("username");
+  if (!username) return;
+
+  const data = await fetchData(`showcase.php?username=${username}`);
   if (!data) return;
 
-  grid.innerHTML = data.map(createCardHTML).join("");
+  grid.innerHTML = data.flatMap(s => s.cards).map(createCardHTML).join("");
 }
 
 // ---------- PACKS ----------
@@ -215,6 +219,9 @@ function setupSellModal() {
 document.addEventListener("DOMContentLoaded", () => {
   const balanceEl = $("user-balance");
   if (balanceEl) balanceEl.textContent = localStorage.getItem("balance") ?? 0;
+
+  const showcaseUsername = $("showcase-username");
+  if (showcaseUsername) showcaseUsername.textContent = localStorage.getItem("name") ?? "User";
 
   handleLogin();
   handleRegister();
