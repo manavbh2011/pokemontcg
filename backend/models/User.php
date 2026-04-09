@@ -6,6 +6,18 @@ class User {
         $this->pdo = $pdo;
     }
 
+    public function register($username, $name, $password) {
+        if ($this->findByUsername($username)) {
+            return false;
+        }
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO trainer (username, name, password_hash) VALUES (?, ?, ?)"
+        );
+        $stmt->execute([$username, $name, password_hash($password, PASSWORD_DEFAULT)]);
+        $stmt->closeCursor();
+        return true;
+    }
+
     public function findByUsername($username) {
         $stmt = $this->pdo->prepare("SELECT * FROM trainer WHERE username = ?");
         $stmt->execute([$username]);

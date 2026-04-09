@@ -26,6 +26,15 @@ class AuthController {
         ];
     }
 
+    public function register($username, $name, $password) {
+        $registered = $this->userModel->register($username, $name, $password);
+        if (!$registered) {
+            http_response_code(409);
+            return ["error" => "Username already taken"];
+        }
+        return ["success" => true];
+    }
+
     public function logout() {
         session_destroy();
         return ["message" => "Logged out"];

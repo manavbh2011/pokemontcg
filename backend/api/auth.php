@@ -10,6 +10,10 @@ if ($method === 'POST' && $action === 'login') {
     $data = json_decode(file_get_contents("php://input"), true);
     echo json_encode($controller->login($data['username'], $data['password']));
 
+} elseif ($method === 'POST' && $action === 'register') {
+    $data = json_decode(file_get_contents("php://input"), true);
+    echo json_encode($controller->register($data['username'], $data['name'], $data['password']));
+
 } elseif ($method === 'POST' && $action === 'logout') {
     echo json_encode($controller->logout());
 

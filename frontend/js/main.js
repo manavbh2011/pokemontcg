@@ -1,9 +1,21 @@
-const API_BASE = "http://localhost/backend/api";
+let API_BASE = null;
+async function getApiBase() {
+  if (API_BASE) return API_BASE;
+  try {
+    const res = await fetch("/DB/pokemon-trader/backend/api/config.php");
+    const config = await res.json();
+    API_BASE = config.api_base || "http://localhost:8888/DB/pokemon-trader/backend/api";
+  } catch (e) {
+    API_BASE = "http://localhost:8888/DB/pokemon-trader/backend/api";
+  }
+  return API_BASE;
+}
 
 // ---------- HELPERS ----------
 async function fetchData(endpoint, options = {}) {
   try {
-    const res = await fetch(`${API_BASE}/${endpoint}`, {
+    const base = await getApiBase();
+    const res = await fetch(`${base}/${endpoint}`, {
       headers: {
         "Content-Type": "application/json",
         ...options.headers
@@ -42,7 +54,7 @@ async function handleLogin() {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
 
-    const res = await fetchData("login.php", {
+    const res = await fetchData("auth.php?action=login", {
       method: "POST",
       body: JSON.stringify(data)
     });
@@ -63,7 +75,7 @@ async function handleRegister() {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(form));
 
-    const res = await fetchData("register.php", {
+    const res = await fetchData("auth.php?action=register", {
       method: "POST",
       body: JSON.stringify(data)
     });
