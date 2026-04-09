@@ -1,21 +1,7 @@
-let API_BASE = null;
-async function getApiBase() {
-  if (API_BASE) return API_BASE;
-  try {
-    const res = await fetch("/DB/pokemon-trader/backend/api/config.php");
-    const config = await res.json();
-    API_BASE = config.api_base || "http://localhost:8888/DB/pokemon-trader/backend/api";
-  } catch (e) {
-    API_BASE = "http://localhost:8888/DB/pokemon-trader/backend/api";
-  }
-  return API_BASE;
-}
-
 // ---------- HELPERS ----------
 async function fetchData(endpoint, options = {}) {
   try {
-    const base = await getApiBase();
-    const res = await fetch(`${base}/${endpoint}`, {
+    const res = await fetch(`${API_BASE}/${endpoint}`, {
       headers: {
         "Content-Type": "application/json",
         ...options.headers
