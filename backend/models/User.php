@@ -11,7 +11,7 @@ class User {
             return false;
         }
         $stmt = $this->pdo->prepare(
-            "INSERT INTO trainer (username, name, password_hash) VALUES (?, ?, ?)"
+            "INSERT INTO trainer (username, name, password_hash, balance) VALUES (?, ?, ?, 10000)"
         );
         $stmt->execute([$username, $name, password_hash($password, PASSWORD_DEFAULT)]);
         $stmt->closeCursor();
