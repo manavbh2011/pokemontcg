@@ -84,20 +84,27 @@ async function loadMarket() {
   const data = await fetchData("market.php");
   if (!data) return;
 
-  grid.innerHTML = data.map(card => `
+  const tcgdex = new TCGdex('en');
+  const cards = await Promise.all(data.map(async listing => {
+    const card = await tcgdex.card.get(listing.card_info_id);
+    return { ...listing, imageURL: card?.getImageURL('low', 'webp') ?? '' };
+  }));
+
+  grid.innerHTML = cards.map(card => `
     <div class="card">
-      <img src="${card.image}" />
-      <h3>${card.name}</h3>
-      <p>${card.price} coins</p>
-      <button onclick="buyCard(${card.id})">Buy</button>
+      <img src="${card.imageURL}" alt="${card.card_name}" style="width:120px;border-radius:8px;" />
+      <h3>${card.card_name}</h3>
+      <p>${card.type} · ${card.level}</p>
+      <p>${card.card_price} coins</p>
+      <button onclick="buyCard(${card.listing_id})">Buy</button>
     </div>
   `).join("");
 }
 
-async function buyCard(id) {
-  const res = await fetchData("buy.php", {
+async function buyCard(listingId) {
+  const res = await fetchData("market.php?action=buy", {
     method: "POST",
-    body: JSON.stringify({ id })
+    body: JSON.stringify({ listing_id: listingId })
   });
 
   if (res?.success) {
