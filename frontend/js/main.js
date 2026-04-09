@@ -144,18 +144,21 @@ async function loadPacks() {
   if (!data) return;
 
   grid.innerHTML = data.map(pack => `
-    <div class="card">
-      <h3>${pack.name}</h3>
-      <p>${pack.price} coins</p>
-      <button onclick="openPack(${pack.id})">Open</button>
+    <div class="card-shell">
+      <div class="card-image">${pack.pack_type_name}</div>
+      <div style="margin-top:auto;">
+        <h3 style="margin-bottom:0.4rem;">${pack.pack_type_name}</h3>
+        <div class="card-meta" style="margin-bottom:0.75rem;"><span>${pack.pack_price} coins</span></div>
+        <button onclick="openPack('${pack.pack_type_id}')">Open Pack</button>
+      </div>
     </div>
   `).join("");
 }
 
-async function openPack(id) {
-  const res = await fetchData("open_pack.php", {
+async function openPack(packTypeId) {
+  const res = await fetchData("packs.php?action=buy", {
     method: "POST",
-    body: JSON.stringify({ id })
+    body: JSON.stringify({ pack_type_id: packTypeId })
   });
 
   if (!res) return;

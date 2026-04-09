@@ -8,7 +8,7 @@ if ($response === false) {
     exit;
 }
 
-$sets     = json_decode($response, true);
+$sets = array_slice(json_decode($response, true), 0, 5);
 $inserted = 0;
 $skipped  = 0;
 
