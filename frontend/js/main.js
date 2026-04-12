@@ -505,6 +505,75 @@ async function addToShowcase(cardId) {
   }
 }
 
+// ---------- TRAINER SEARCH ----------
+function setupTrainerSearch() {
+  const input = $("trainer-search");
+  const suggestions = $("trainer-suggestions");
+  if (!input) return;
+
+  let debounce;
+  input.addEventListener("input", () => {
+    clearTimeout(debounce);
+    const q = input.value.trim();
+    if (!q) { suggestions.style.display = "none"; return; }
+    debounce = setTimeout(async () => {
+      const data = await fetchData(`auth.php?action=search&q=${encodeURIComponent(q)}`);
+      if (!data || !data.length) { suggestions.style.display = "none"; return; }
+      suggestions.innerHTML = data.map(u => `
+        <li style="padding:0.6rem 1rem;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);color:#eef2ff;"
+            onmousedown="event.preventDefault()"
+            onclick="loadTrainerProfile('${u.username.replace(/'/g, "\\'")}')"
+            onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+            onmouseout="this.style.background=''">
+          <strong>${u.name}</strong> <span style="color:#a5b4d4;">@${u.username}</span>
+        </li>
+      `).join("");
+      suggestions.style.display = "block";
+    }, 250);
+  });
+
+  input.addEventListener("blur", () => setTimeout(() => { suggestions.style.display = "none"; }, 150));
+}
+
+async function loadTrainerProfile(username) {
+  $("trainer-suggestions").style.display = "none";
+  $("trainer-search").value = username;
+
+  const [profile, showcaseData] = await Promise.all([
+    fetchData(`auth.php?action=profile&username=${encodeURIComponent(username)}`),
+    fetchData(`showcase.php?username=${encodeURIComponent(username)}`)
+  ]);
+
+  if (!profile || profile.error) return;
+
+  $("tp-name").textContent = profile.name;
+  $("tp-username").textContent = profile.username;
+
+  const profileSection = $("trainer-profile");
+  profileSection.style.display = "block";
+
+  const grid = $("tp-showcase-grid");
+  const cards = (showcaseData || []).flatMap(s => s.cards);
+
+  if (!cards.length) {
+    grid.innerHTML = '<p class="muted">This trainer has no showcase cards yet.</p>';
+    return;
+  }
+
+  const tcgdex = new TCGdex('en');
+  const withImages = await Promise.all(cards.map(async c => {
+    const card = await tcgdex.card.get(c.card_info_id);
+    return { ...c, imageURL: card?.getImageURL('low', 'webp') ?? '' };
+  }));
+
+  grid.innerHTML = withImages.map(c => `
+    <div class="card-shell">
+      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
+      <div><h3>${c.card_name}</h3><p class="muted">${c.type} · ${c.level}</p></div>
+    </div>
+  `).join("");
+}
+
 // ---------- PACKS ----------
 async function loadPacks() {
   const grid = $("packs-grid");
@@ -711,6 +780,7 @@ document.addEventListener("DOMContentLoaded", () => {
   handleLogin();
   handleRegister();
 
+  setupTrainerSearch();
   setupMarketFilters();
   loadMarket();
   loadCollection();

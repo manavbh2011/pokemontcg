@@ -35,6 +35,26 @@ class AuthController {
         return ["success" => true];
     }
 
+    public function searchUsers($query) {
+        return $this->userModel->search($query);
+    }
+
+    public function getProfile($username) {
+        if (!$username) {
+            http_response_code(400);
+            return ["error" => "Username required"];
+        }
+        $trainer = $this->userModel->findByUsername($username);
+        if (!$trainer) {
+            http_response_code(404);
+            return ["error" => "User not found"];
+        }
+        return [
+            "username" => $trainer['username'],
+            "name"     => $trainer['name']
+        ];
+    }
+
     public function logout() {
         session_destroy();
         return ["message" => "Logged out"];

@@ -3,8 +3,9 @@
 
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" href="../favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pokemon Trader - User Profile</title>
+  <title>Pokemon Trader - Trainers</title>
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 
@@ -21,39 +22,35 @@
         <a href="market.html">Market</a>
         <a href="collection.html">Collection</a>
         <a href="showcase.html">Showcase</a>
-        <a class="active" href="user.html">Profile</a>
+        <a class="active" href="user.html">Trainers</a>
         <a href="login.html" data-logout>Logout</a>
       </nav>
     </div>
   </header>
 
   <main class="page">
-    <div class="profile-layout">
-      <section class="panel profile-card" id="profile">
-        <img id="user-avatar" src="" alt="User Avatar" />
-        <div>
-          <span class="eyebrow">Trainer profile</span>
-          <h1 id="profile-username">Trainer</h1>
-          <p class="profile-coins" id="profile-coins-row">
-            Coins: <strong id="profile-balance">0</strong>
-          </p>
-          <p class="muted" id="user-bio">Bio goes here.</p>
-          <p class="muted">Joined: <span id="join-date"></span></p>
-        </div>
-      </section>
+    <section class="panel section-card">
+      <span class="eyebrow">Find a trainer</span>
+      <h1>Trainer Search</h1>
+      <p class="muted">Search by username or display name to view their showcase.</p>
 
-      <section class="panel link-card">
-        <h2>Links</h2>
-        <p class="muted">Jump into this trainer's featured cards and public collection moments.</p>
-        <div class="cta-row">
-          <a class="button button-primary" id="showcase-link" href="showcase.html">View Card Showcase</a>
-        </div>
-      </section>
-    </div>
+      <div style="position:relative;max-width:480px;margin-top:1.5rem;">
+        <input type="text" id="trainer-search" placeholder="Search trainers..." autocomplete="off" />
+        <ul id="trainer-suggestions" style="display:none;position:absolute;z-index:100;width:100%;background:#121933;border:1px solid rgba(255,255,255,0.12);border-radius:12px;margin:4px 0 0;padding:0;list-style:none;max-height:260px;overflow-y:auto;"></ul>
+      </div>
+    </section>
+
+    <section class="panel section-card" id="trainer-profile" style="display:none;margin-top:1.5rem;">
+      <span class="eyebrow">Trainer profile</span>
+      <h2 id="tp-name"></h2>
+      <p class="muted">@<span id="tp-username"></span></p>
+      <h3 style="margin-top:1.5rem;">Showcase</h3>
+      <div id="tp-showcase-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1rem;margin-top:1rem;"></div>
+    </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@tcgdex/sdk@2/dist/tcgdex.browser.global.min.js"></script>
   <script src="../js/config.js"></script>
-  <script src="../js/logout.js"></script>
   <script src="../js/main.js"></script>
 </body>
 

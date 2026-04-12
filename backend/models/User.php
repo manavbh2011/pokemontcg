@@ -18,6 +18,17 @@ class User {
         return true;
     }
 
+    public function search($query) {
+        $like = '%' . $query . '%';
+        $stmt = $this->pdo->prepare(
+            "SELECT username, name FROM trainer WHERE username LIKE ? OR name LIKE ? LIMIT 10"
+        );
+        $stmt->execute([$like, $like]);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
+    }
+
     public function findByUsername($username) {
         $stmt = $this->pdo->prepare("SELECT * FROM trainer WHERE username = ?");
         $stmt->execute([$username]);

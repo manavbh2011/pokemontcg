@@ -9,6 +9,17 @@ $action = $_GET['action'] ?? '';
 if ($method === 'GET' && $action === 'me') {
     echo json_encode($controller->me());
 
+} elseif ($method === 'GET' && $action === 'search') {
+    $q = trim($_GET['q'] ?? '');
+    if ($q === '') {
+        echo json_encode([]);
+    } else {
+        echo json_encode($controller->searchUsers($q));
+    }
+
+} elseif ($method === 'GET' && $action === 'profile') {
+    echo json_encode($controller->getProfile($_GET['username'] ?? ''));
+
 } elseif ($method === 'POST' && $action === 'login') {
     $data = json_decode(file_get_contents("php://input"), true);
     echo json_encode($controller->login($data['username'], $data['password']));
