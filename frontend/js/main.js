@@ -20,6 +20,17 @@ function $(id) {
   return document.getElementById(id);
 }
 
+function setFormNotice(el, message) {
+  if (!el) return;
+  if (message) {
+    el.textContent = message;
+    el.hidden = false;
+  } else {
+    el.textContent = "";
+    el.hidden = true;
+  }
+}
+
 // ---------- CARD RENDER ----------
 function createCardHTML(card) {
   return `
@@ -34,10 +45,12 @@ function createCardHTML(card) {
 // ---------- AUTH ----------
 async function handleLogin() {
   const form = $("login-form");
+  const notice = $("login-error");
   if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    setFormNotice(notice, "");
     const data = Object.fromEntries(new FormData(form));
 
     const res = await fetchData("auth.php?action=login", {
@@ -51,17 +64,24 @@ async function handleLogin() {
       localStorage.setItem("name", res.name);
       window.location.href = "market.html";
     } else {
-      alert("Login failed");
+      const msg =
+        res?.error ||
+        (res === null
+          ? "Could not reach the server. Check that PHP is running and config.js API_BASE is correct."
+          : "Invalid username or password.");
+      setFormNotice(notice, msg);
     }
   });
 }
 
 async function handleRegister() {
   const form = $("register-form");
+  const notice = $("register-error");
   if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    setFormNotice(notice, "");
     const data = Object.fromEntries(new FormData(form));
 
     const res = await fetchData("auth.php?action=register", {
@@ -72,7 +92,12 @@ async function handleRegister() {
     if (res?.success) {
       window.location.href = "login.html";
     } else {
-      alert("Register failed");
+      const msg =
+        res?.error ||
+        (res === null
+          ? "Could not reach the server. Check that PHP is running and config.js API_BASE is correct."
+          : "Registration failed.");
+      setFormNotice(notice, msg);
     }
   });
 }
