@@ -20,6 +20,69 @@ class MarketController {
         return $this->marketModel->getActiveListings();
     }
 
+    public function listCard($cardId, $price) {
+        if (!isset($_SESSION['username'])) {
+            http_response_code(401);
+            return ["error" => "Not logged in"];
+        }
+
+        $seller = $_SESSION['username'];
+        $cardId = (int) $cardId;
+        $price  = floatval($price);
+
+        if ($cardId <= 0 || $price <= 0) {
+            http_response_code(400);
+            return ["error" => "Invalid card or price"];
+        }
+
+        $owner = $this->cardModel->getOwner($cardId);
+        if ($owner === false || $owner === null) {
+            http_response_code(404);
+            return ["error" => "Card not found"];
+        }
+        if ($owner !== $seller) {
+            http_response_code(403);
+            return ["error" => "You don't own this card"];
+        }
+
+        if ($this->marketModel->getActiveListingIdForCard($cardId)) {
+            http_response_code(409);
+            return ["error" => "This card is already listed for sale."];
+        }
+
+        $this->marketModel->createListing($cardId, $price);
+        return ["success" => true];
+    }
+
+    public function updateListingPrice($listingId, $price) {
+        if (!isset($_SESSION['username'])) {
+            http_response_code(401);
+            return ["error" => "Not logged in"];
+        }
+
+        $seller    = $_SESSION['username'];
+        $listingId = (int) $listingId;
+        $price     = floatval($price);
+
+        if ($listingId <= 0 || $price <= 0) {
+            http_response_code(400);
+            return ["error" => "Invalid listing or price"];
+        }
+
+        $listing = $this->marketModel->getListing($listingId);
+        if (!$listing) {
+            http_response_code(404);
+            return ["error" => "Listing not found or already sold"];
+        }
+        if ($listing['seller'] !== $seller) {
+            http_response_code(403);
+            return ["error" => "Not your listing"];
+        }
+
+        $this->marketModel->updateListingPrice($listingId, $price);
+        return ["success" => true];
+    }
+
     public function buyCard($listingId) {
         if (!isset($_SESSION['username'])) {
             http_response_code(401);

@@ -31,6 +31,22 @@ function setFormNotice(el, message) {
   }
 }
 
+/** Market banner: supports error vs success styling */
+function setMarketNotice(message, variant = "error") {
+  const el = $("market-notice");
+  if (!el) return;
+  if (!message) {
+    el.textContent = "";
+    el.hidden = true;
+    el.classList.remove("form-notice--error", "form-notice--success");
+    return;
+  }
+  el.textContent = message;
+  el.hidden = false;
+  el.classList.remove("form-notice--error", "form-notice--success");
+  el.classList.add(variant === "success" ? "form-notice--success" : "form-notice--error");
+}
+
 function formatCoins(value) {
   if (value == null || value === "") return "0";
   const n = Number(value);
@@ -146,31 +162,150 @@ async function handleRegister() {
 }
 
 // ---------- MARKET ----------
+/** @type {Array<object> | null} */
+let marketListingsCache = null;
+
+function populateMarketFilterSelects(cards) {
+  const typeSel = $("filter-type");
+  const raritySel = $("filter-rarity");
+  if (!typeSel || !raritySel) return;
+
+  const types = [...new Set(cards.map((c) => c.type).filter(Boolean))].sort();
+  const rarities = [...new Set(cards.map((c) => c.level).filter(Boolean))].sort();
+
+  const keepType = typeSel.value;
+  const keepRarity = raritySel.value;
+
+  typeSel.replaceChildren();
+  typeSel.appendChild(new Option("All Types", ""));
+  types.forEach((t) => typeSel.appendChild(new Option(t, t)));
+
+  raritySel.replaceChildren();
+  raritySel.appendChild(new Option("All Rarities", ""));
+  rarities.forEach((r) => raritySel.appendChild(new Option(r, r)));
+
+  if ([...typeSel.options].some((o) => o.value === keepType)) typeSel.value = keepType;
+  if ([...raritySel.options].some((o) => o.value === keepRarity)) raritySel.value = keepRarity;
+}
+
+function getFilteredMarketListings() {
+  if (!marketListingsCache) return [];
+  const q = ($("search")?.value ?? "").trim().toLowerCase();
+  const type = $("filter-type")?.value ?? "";
+  const rarity = $("filter-rarity")?.value ?? "";
+  const sort = $("sort-by")?.value ?? "price-asc";
+
+  let list = [...marketListingsCache];
+
+  if (q) {
+    list = list.filter((c) => (c.card_name || "").toLowerCase().includes(q));
+  }
+  if (type) {
+    list = list.filter((c) => c.type === type);
+  }
+  if (rarity) {
+    list = list.filter((c) => c.level === rarity);
+  }
+
+  list.sort((a, b) => {
+    const pa = Number(a.card_price);
+    const pb = Number(b.card_price);
+    if (sort === "price-desc") return pb - pa;
+    return pa - pb;
+  });
+
+  return list;
+}
+
+function renderMarketGrid() {
+  const grid = $("listings-grid");
+  if (!grid) return;
+
+  if (!marketListingsCache) return;
+
+  if (marketListingsCache.length === 0) {
+    grid.innerHTML = '<p class="muted">No listings yet.</p>';
+    return;
+  }
+
+  const list = getFilteredMarketListings();
+  if (list.length === 0) {
+    grid.innerHTML = '<p class="muted">No listings match your filters.</p>';
+    return;
+  }
+
+  const me = localStorage.getItem("username");
+  grid.innerHTML = list
+    .map((card) => {
+      const isMine = Boolean(me && card.seller === me);
+      const lid = Number(card.listing_id);
+      const priceNum = Number(card.card_price);
+      const priceBlock = isMine
+        ? `<div class="market-price-row">
+             <label for="listing-price-${lid}">Price (coins)</label>
+             <input type="number" id="listing-price-${lid}" min="1" step="1" value="${priceNum}" />
+             <button type="button" class="button-secondary" onclick="saveListingPrice(${lid})">Save</button>
+           </div>`
+        : `<p>${priceNum} coins</p>`;
+      const actionBlock = isMine
+        ? `<p class="muted">Your listing</p>`
+        : `<button type="button" onclick="buyCard(${lid})">Buy</button>`;
+      return `
+    <div class="card">
+      <img src="${card.imageURL}" alt="${card.card_name}" style="width:120px;border-radius:8px;" />
+      <h3>${card.card_name}</h3>
+      <p>${card.type} · ${card.level}</p>
+      ${priceBlock}
+      ${actionBlock}
+    </div>
+  `;
+    })
+    .join("");
+}
+
+function setupMarketFilters() {
+  if (!$("listings-grid")) return;
+
+  const rerender = () => renderMarketGrid();
+  $("search")?.addEventListener("input", rerender);
+  $("filter-type")?.addEventListener("change", rerender);
+  $("filter-rarity")?.addEventListener("change", rerender);
+  $("sort-by")?.addEventListener("change", rerender);
+}
+
 async function loadMarket() {
   const grid = $("listings-grid");
   if (!grid) return;
 
   const data = await fetchData("market.php");
-  if (!data) return;
+  if (!data || data.error) {
+    marketListingsCache = [];
+    renderMarketGrid();
+    return;
+  }
+  if (!Array.isArray(data)) {
+    marketListingsCache = [];
+    renderMarketGrid();
+    return;
+  }
 
-  const tcgdex = new TCGdex('en');
-  const cards = await Promise.all(data.map(async listing => {
-    const card = await tcgdex.card.get(listing.card_info_id);
-    return { ...listing, imageURL: card?.getImageURL('low', 'webp') ?? '' };
-  }));
+  const tcgdex = new TCGdex("en");
+  const cards = await Promise.all(
+    data.map(async (listing) => {
+      const id = listing.card_info_id;
+      const card = id ? await tcgdex.card.get(id) : null;
+      return { ...listing, imageURL: card?.getImageURL("low", "webp") ?? "" };
+    })
+  );
 
-  grid.innerHTML = cards.map(card => `
-    <div class="card">
-      <img src="${card.imageURL}" alt="${card.card_name}" style="width:120px;border-radius:8px;" />
-      <h3>${card.card_name}</h3>
-      <p>${card.type} · ${card.level}</p>
-      <p>${card.card_price} coins</p>
-      <button onclick="buyCard(${card.listing_id})">Buy</button>
-    </div>
-  `).join("");
+  marketListingsCache = cards;
+  populateMarketFilterSelects(cards);
+  renderMarketGrid();
 }
 
 async function buyCard(listingId) {
+  setMarketNotice("");
+
   const res = await fetchData("market.php?action=buy", {
     method: "POST",
     body: JSON.stringify({ listing_id: listingId })
@@ -179,9 +314,56 @@ async function buyCard(listingId) {
   if (res?.success) {
     if (res.balance != null) setBalanceDisplay(res.balance);
     else void refreshBalance();
-    alert("Purchased!");
     loadMarket();
+    return;
   }
+
+  const apiErr = res?.error ?? "";
+  let msg =
+    apiErr ||
+    (res === null
+      ? "Could not reach the server. Check that PHP is running and config.js API_BASE is correct."
+      : "Purchase failed.");
+  if (/cannot buy your own listing/i.test(apiErr) || /own listing/i.test(apiErr)) {
+    msg = "You can't buy your own card.";
+  }
+  setMarketNotice(msg, "error");
+  $("market-notice")?.scrollIntoView({ block: "start", behavior: "smooth" });
+}
+
+async function saveListingPrice(listingId) {
+  const input = $(`listing-price-${listingId}`);
+  const price = parseFloat(input?.value ?? "");
+  if (!Number.isFinite(price) || price <= 0) {
+    setMarketNotice("Enter a valid price greater than zero.", "error");
+    $("market-notice")?.scrollIntoView({ block: "start", behavior: "smooth" });
+    return;
+  }
+
+  setMarketNotice("");
+  const res = await fetchData("market.php?action=update_price", {
+    method: "POST",
+    body: JSON.stringify({ listing_id: listingId, price })
+  });
+
+  if (res?.success) {
+    const row = marketListingsCache?.find(
+      (c) => Number(c.listing_id) === Number(listingId)
+    );
+    if (row) row.card_price = price;
+    setMarketNotice("Price updated.", "success");
+    $("market-notice")?.scrollIntoView({ block: "start", behavior: "smooth" });
+    renderMarketGrid();
+    return;
+  }
+
+  const msg =
+    res?.error ||
+    (res === null
+      ? "Could not reach the server. Check that PHP is running and config.js API_BASE is correct."
+      : "Could not update price.");
+  setMarketNotice(msg, "error");
+  $("market-notice")?.scrollIntoView({ block: "start", behavior: "smooth" });
 }
 
 // ---------- COLLECTION ----------
@@ -386,25 +568,83 @@ function setupSellModal() {
   const modal = $("sell-modal");
   const closeBtn = $("close-sell-modal");
   const form = $("sell-form");
+  const select = $("sell-card");
+  const sellNotice = $("sell-error");
 
   if (!openBtn || !modal) return;
 
-  openBtn.onclick = () => modal.showModal();
-  closeBtn.onclick = () => modal.close();
+  openBtn.onclick = async () => {
+    setFormNotice(sellNotice, "");
+    const username = localStorage.getItem("username");
+    if (!username || !select) {
+      alert("Log in to sell cards.");
+      return;
+    }
+
+    const data = await fetchData(`cards.php?username=${encodeURIComponent(username)}`);
+    select.innerHTML = "";
+
+    if (!data || data.error) {
+      select.innerHTML = '<option value="">Could not load collection</option>';
+      modal.showModal();
+      return;
+    }
+    if (!Array.isArray(data) || data.length === 0) {
+      select.innerHTML = '<option value="">No cards in collection</option>';
+      modal.showModal();
+      return;
+    }
+
+    data.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = String(c.card_id);
+      opt.textContent = `${c.card_name} (${c.type})`;
+      select.appendChild(opt);
+    });
+
+    modal.showModal();
+  };
+
+  closeBtn.onclick = () => {
+    setFormNotice(sellNotice, "");
+    modal.close();
+  };
 
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(form));
+    setFormNotice(sellNotice, "");
+    const raw = Object.fromEntries(new FormData(form));
+    const card_id = parseInt(raw.card_id, 10);
+    const price = parseFloat(raw.price);
 
-    const res = await fetchData("sell.php", {
-      method: "POST",
-      body: JSON.stringify(data)
-    });
+    let response;
+    let body;
+    try {
+      response = await fetch(`${API_BASE}/sell.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ card_id, price })
+      });
+      body = await response.json().catch(() => ({}));
+    } catch (err) {
+      console.error(err);
+      setFormNotice(sellNotice, "Could not list card.");
+      sellNotice?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      return;
+    }
 
-    if (res?.success) {
+    if (body?.success) {
       void refreshBalance();
+      setFormNotice(sellNotice, "");
       modal.close();
       loadMarket();
+    } else if (response.status === 409 || /already listed/i.test(body?.error ?? "")) {
+      setFormNotice(sellNotice, "This card is already listed for sale.");
+      sellNotice?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    } else {
+      setFormNotice(sellNotice, body?.error ?? "Could not list card.");
+      sellNotice?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
   });
 }
@@ -459,6 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
   handleLogin();
   handleRegister();
 
+  setupMarketFilters();
   loadMarket();
   loadCollection();
   loadShowcase();

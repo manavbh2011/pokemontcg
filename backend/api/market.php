@@ -13,6 +13,10 @@ if ($method === 'GET') {
     $data = json_decode(file_get_contents('php://input'), true);
     echo json_encode($controller->buyCard($data['listing_id']));
 
+} elseif ($method === 'POST' && $action === 'update_price') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    echo json_encode($controller->updateListingPrice($data['listing_id'] ?? null, $data['price'] ?? null));
+
 } else {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid request']);

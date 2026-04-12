@@ -39,6 +39,14 @@
         <div class="balance-pill">Coins: <span id="user-balance">0</span></div>
       </div>
 
+      <div
+        id="market-notice"
+        class="market-notice-banner form-notice form-notice--error"
+        role="alert"
+        aria-live="assertive"
+        hidden
+      ></div>
+
       <div id="filters" class="controls">
         <input type="text" id="search" placeholder="Search cards..." />
         <select id="filter-type">
@@ -72,11 +80,12 @@
       <div class="dialog-body">
         <h2>List a Card for Sale</h2>
         <form id="sell-form">
+          <div id="sell-error" class="form-notice form-notice--error" role="alert" hidden></div>
           <label for="sell-card">Select Card</label>
-          <select id="sell-card"></select>
+          <select id="sell-card" name="card_id" required></select>
 
           <label for="sell-price">Price (coins)</label>
-          <input type="number" id="sell-price" min="1" required />
+          <input type="number" id="sell-price" name="price" min="1" step="1" required />
 
           <div class="dialog-actions">
             <button type="submit">List Card</button>
