@@ -21,7 +21,7 @@
         <a href="market.html">Market</a>
         <a href="collection.html">Collection</a>
         <a href="showcase.html">Showcase</a>
-        <a class="active" href="login.html">Login</a>
+        <span id="nav-auth"></span>
       </nav>
     </div>
   </header>
@@ -31,6 +31,7 @@
       <span class="eyebrow">Welcome back, trainer</span>
       <h1>Login</h1>
       <p class="helper-text">Jump back into the market, open new packs, and manage your collection.</p>
+      <div id="login-gate-notice" class="form-notice form-notice--gate" hidden role="status"></div>
       <div id="login-error" class="form-notice form-notice--error" hidden role="alert"></div>
       <form id="login-form">
         <label for="username">Username</label>
@@ -46,6 +47,19 @@
   </main>
 
   <script src="../js/config.js"></script>
+  <script>
+    (function () {
+      var el = document.getElementById("nav-auth");
+      if (!el) return;
+      if (localStorage.getItem("username")) {
+        el.innerHTML =
+          '<a href="user.html">Profile</a><a href="login.html" data-logout>Logout</a>';
+      } else {
+        el.innerHTML = '<a class="active" href="login.html">Login</a>';
+      }
+    })();
+  </script>
+  <script src="../js/logout.js"></script>
   <script src="../js/main.js"></script>
 </body>
 

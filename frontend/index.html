@@ -21,7 +21,7 @@
         <a href="pages/market.html">Market</a>
         <a href="pages/collection.html">Collection</a>
         <a href="pages/showcase.html">Showcase</a>
-        <a href="pages/login.html">Login</a>
+        <span id="nav-auth"></span>
       </nav>
     </div>
   </header>
@@ -36,7 +36,7 @@
           that feels exciting instead of plain.
         </p>
         <div class="cta-row">
-          <a class="button button-primary" href="pages/login.html">Start collecting</a>
+          <a class="button button-primary" id="cta-start-collecting" href="pages/login.html">Start collecting</a>
           <a class="button button-secondary" href="pages/packs.html">View packs</a>
         </div>
         <div class="stats">
@@ -92,6 +92,26 @@
 
     <p class="footer-note">A sharper UI will make the pack-opening moment feel much more addictive.</p>
   </main>
+  <script>
+    (function () {
+      var el = document.getElementById("nav-auth");
+      if (!el) return;
+      if (localStorage.getItem("username")) {
+        el.innerHTML =
+          '<a href="pages/user.html">Profile</a><a href="pages/login.html" data-logout>Logout</a>';
+      } else {
+        el.innerHTML = '<a href="pages/login.html">Login</a>';
+      }
+      var start = document.getElementById("cta-start-collecting");
+      if (start) {
+        start.href = localStorage.getItem("username")
+          ? "pages/market.html"
+          : "pages/login.html";
+      }
+    })();
+  </script>
+  <script src="js/config.js"></script>
+  <script src="js/logout.js"></script>
 </body>
 
 </html>

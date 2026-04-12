@@ -122,6 +122,11 @@ body::before {
   flex-wrap: wrap;
 }
 
+/* Wrapper for dynamic Login vs Profile/Logout (index.html) */
+.nav-links #nav-auth {
+  display: contents;
+}
+
 .nav-links a {
   color: var(--muted);
   padding: 0.7rem 1rem;
@@ -438,6 +443,12 @@ textarea:focus {
   background: rgba(255, 107, 107, 0.12);
   border: 1px solid rgba(255, 107, 107, 0.35);
   color: #fecaca;
+}
+
+.form-notice--gate {
+  background: rgba(255, 213, 74, 0.1);
+  border: 1px solid rgba(255, 213, 74, 0.35);
+  color: #fef9c3;
 }
 
 .form-card form {

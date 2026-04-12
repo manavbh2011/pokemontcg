@@ -51,6 +51,7 @@ async function handleLogin() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     setFormNotice(notice, "");
+    setFormNotice($("login-gate-notice"), "");
     const data = Object.fromEntries(new FormData(form));
 
     const res = await fetchData("auth.php?action=login", {
@@ -62,7 +63,14 @@ async function handleLogin() {
       localStorage.setItem("balance", res.balance);
       localStorage.setItem("username", res.username);
       localStorage.setItem("name", res.name);
-      window.location.href = "market.html";
+      const next = new URLSearchParams(window.location.search).get("required");
+      const dest = {
+        packs: "packs.html",
+        market: "market.html",
+        collection: "collection.html",
+        showcase: "showcase.html"
+      }[next];
+      window.location.href = dest || "market.html";
     } else {
       const msg =
         res?.error ||
@@ -349,6 +357,36 @@ function setupSellModal() {
 
 // ---------- INIT ----------
 document.addEventListener("DOMContentLoaded", () => {
+  if (window.location.pathname.endsWith("login.html") && localStorage.getItem("username")) {
+    const next = new URLSearchParams(window.location.search).get("required");
+    const dest = {
+      packs: "packs.html",
+      market: "market.html",
+      collection: "collection.html",
+      showcase: "showcase.html"
+    }[next];
+    window.location.replace(dest || "market.html");
+    return;
+  }
+
+  if (window.location.pathname.endsWith("login.html")) {
+    const req = new URLSearchParams(window.location.search).get("required");
+    const gate = $("login-gate-notice");
+    if (req && gate) {
+      const labels = {
+        packs: "Packs",
+        market: "Market",
+        collection: "Collection",
+        showcase: "Showcase"
+      };
+      const name = labels[req] || req;
+      setFormNotice(
+        gate,
+        "You must log in to access " + name + ". Sign in below to continue."
+      );
+    }
+  }
+
   const balanceEl = $("user-balance");
   if (balanceEl) balanceEl.textContent = localStorage.getItem("balance") ?? 0;
 

@@ -5,6 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pokemon Trader - My Collection</title>
+  <script src="../js/auth-guard.js"></script>
   <link rel="stylesheet" href="../css/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@tcgdex/sdk@2/dist/tcgdex.browser.global.min.js"></script>
 </head>
@@ -23,7 +24,7 @@
         <a class="active" href="collection.html">Collection</a>
         <a href="showcase.html">Showcase</a>
         <a href="user.html">Profile</a>
-        <a href="login.html">Logout</a>
+        <a href="login.html" data-logout>Logout</a>
       </nav>
     </div>
   </header>
@@ -37,6 +38,7 @@
   </main>
 
   <script src="../js/config.js"></script>
+  <script src="../js/logout.js"></script>
   <script src="../js/main.js"></script>
 </body>
 
