@@ -387,8 +387,8 @@ async function loadCollection() {
   if (!username) return;
 
   const data = await fetchData(`cards.php?username=${username}`);
-  if (!data || data.error) {
-    grid.innerHTML = '<p class="muted">No cards in your collection yet.</p>';
+  if (!data || data.length === 0 || data.error) {
+    grid.innerHTML = '<p class="muted">No cards in your collection yet. <a href="packs.html">Open some packs</a> to get started!</p>';
     return;
   }
 
