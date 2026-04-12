@@ -39,4 +39,21 @@ class AuthController {
         session_destroy();
         return ["message" => "Logged out"];
     }
+
+    public function me() {
+        if (!isset($_SESSION['username'])) {
+            http_response_code(401);
+            return ["error" => "Not logged in"];
+        }
+        $trainer = $this->userModel->findByUsername($_SESSION['username']);
+        if (!$trainer) {
+            http_response_code(404);
+            return ["error" => "User not found"];
+        }
+        return [
+            "username" => $trainer['username'],
+            "name"     => $trainer['name'],
+            "balance"  => $trainer['balance']
+        ];
+    }
 }

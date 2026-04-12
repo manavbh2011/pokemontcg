@@ -53,7 +53,13 @@ class PackController {
             $cards = $this->packModel->fetchAndStoreCards($packType['pack_type_id'], $packId, $username);
 
             $this->pdo->commit();
-            return ["pack_id" => $packId, "cards" => $cards];
+            $after = $this->userModel->findByUsername($username);
+            return [
+                "success" => true,
+                "pack_id" => $packId,
+                "cards"   => $cards,
+                "balance" => $after["balance"]
+            ];
         } catch (Exception $e) {
             $this->pdo->rollBack();
             http_response_code(500);

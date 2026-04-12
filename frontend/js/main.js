@@ -31,6 +31,41 @@ function setFormNotice(el, message) {
   }
 }
 
+function formatCoins(value) {
+  if (value == null || value === "") return "0";
+  const n = Number(value);
+  if (Number.isNaN(n)) return String(value);
+  return n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+function setBalanceDisplay(value) {
+  const raw = value == null || value === "" ? "0" : String(value);
+  localStorage.setItem("balance", raw);
+  const label = formatCoins(raw);
+  ["user-balance", "profile-balance"].forEach((id) => {
+    const el = $(id);
+    if (el) el.textContent = label;
+  });
+}
+
+async function refreshBalance() {
+  if (!localStorage.getItem("username")) return;
+  const res = await fetchData("auth.php?action=me");
+  if (res?.balance != null && !res.error) {
+    setBalanceDisplay(res.balance);
+  }
+}
+
+async function loadProfileFromApi() {
+  const res = await fetchData("auth.php?action=me");
+  if (!res || res.error) return;
+
+  const u = $("profile-username");
+  if (u) u.textContent = res.username ?? "";
+
+  if (res.balance != null) setBalanceDisplay(res.balance);
+}
+
 // ---------- CARD RENDER ----------
 function createCardHTML(card) {
   return `
@@ -60,7 +95,7 @@ async function handleLogin() {
     });
 
     if (res?.username) {
-      localStorage.setItem("balance", res.balance);
+      if (res.balance != null) setBalanceDisplay(res.balance);
       localStorage.setItem("username", res.username);
       localStorage.setItem("name", res.name);
       const next = new URLSearchParams(window.location.search).get("required");
@@ -142,6 +177,8 @@ async function buyCard(listingId) {
   });
 
   if (res?.success) {
+    if (res.balance != null) setBalanceDisplay(res.balance);
+    else void refreshBalance();
     alert("Purchased!");
     loadMarket();
   }
@@ -305,6 +342,9 @@ async function openPack(packTypeId) {
     return;
   }
 
+  if (res.balance != null) setBalanceDisplay(res.balance);
+  else void refreshBalance();
+
   const modal = $("pack-open-modal");
   const results = $("pack-results");
 
@@ -349,6 +389,7 @@ function setupSellModal() {
     });
 
     if (res?.success) {
+      void refreshBalance();
       modal.close();
       loadMarket();
     }
@@ -387,16 +428,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  const balanceEl = $("user-balance");
-  if (balanceEl) balanceEl.textContent = localStorage.getItem("balance") ?? 0;
+  if (window.location.pathname.endsWith("user.html")) {
+    void loadProfileFromApi();
+  } else {
+    if ($("user-balance") || $("profile-balance")) {
+      setBalanceDisplay(localStorage.getItem("balance") ?? "0");
+    }
+    void refreshBalance();
+  }
 
   const showcaseUsername = $("showcase-username");
   if (showcaseUsername) showcaseUsername.textContent = localStorage.getItem("name") ?? "User";
-
-  const profileUsername = $("profile-username");
-  if (profileUsername) {
-    profileUsername.textContent = localStorage.getItem("username") ?? "Trainer";
-  }
 
   const closeModal = $("close-modal");
   if (closeModal) closeModal.onclick = () => $("pack-open-modal").close();

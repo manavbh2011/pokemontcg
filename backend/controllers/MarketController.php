@@ -56,7 +56,13 @@ class MarketController {
             $this->marketModel->recordTransaction($listingId, $seller, $buyer);
 
             $this->pdo->commit();
-            return ["message" => "Card purchased successfully", "card_id" => $listing['card_id']];
+            $buyerRow = $this->userModel->findByUsername($buyer);
+            return [
+                "success"  => true,
+                "message"  => "Card purchased successfully",
+                "card_id"  => $listing['card_id'],
+                "balance"  => $buyerRow["balance"]
+            ];
         } catch (Exception $e) {
             $this->pdo->rollBack();
             http_response_code(500);

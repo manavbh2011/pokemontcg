@@ -477,6 +477,17 @@ label {
   gap: 1rem;
 }
 
+.profile-coins {
+  margin: 0.25rem 0 0;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.profile-coins strong {
+  color: #ffe28a;
+  font-weight: 700;
+}
+
 #user-avatar {
   width: 104px;
   height: 104px;

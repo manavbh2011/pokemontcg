@@ -6,7 +6,10 @@ $controller = new AuthController($pdo);
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
-if ($method === 'POST' && $action === 'login') {
+if ($method === 'GET' && $action === 'me') {
+    echo json_encode($controller->me());
+
+} elseif ($method === 'POST' && $action === 'login') {
     $data = json_decode(file_get_contents("php://input"), true);
     echo json_encode($controller->login($data['username'], $data['password']));
 
