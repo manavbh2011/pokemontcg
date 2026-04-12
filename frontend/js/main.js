@@ -317,7 +317,20 @@ async function loadPacks() {
   if (!grid) return;
 
   const data = await fetchData("packs.php");
-  if (!data) return;
+  if (data == null) {
+    grid.innerHTML =
+      '<p class="muted">Could not load packs. Check that PHP is running, <code>config.js</code> <code>API_BASE</code> matches your server (e.g. <code>http://localhost:8888/backend/api</code>), and the database is up.</p>';
+    return;
+  }
+  if (data.error) {
+    grid.innerHTML = `<p class="muted">${String(data.error)}</p>`;
+    return;
+  }
+  if (!Array.isArray(data) || data.length === 0) {
+    grid.innerHTML =
+      '<p class="muted">No pack types in the database yet. From the project root run: <code>php backend/scripts/seed_packs.php</code> (needs internet), then refresh this page.</p>';
+    return;
+  }
 
   grid.innerHTML = data.map(pack => `
     <div class="card-shell">

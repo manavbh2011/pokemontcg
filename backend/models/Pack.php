@@ -13,18 +13,15 @@ class Pack {
         return $result;
     }
 
-    public function getAvailablePack($packTypeId) {
-        $stmt = $this->pdo->prepare("
-            SELECT p.pack_id FROM pack p
-            JOIN pack_type pt ON p.pack_type_id = pt.pack_type_id
-            LEFT JOIN buys_pack bp ON p.pack_id = bp.pack_id
-            WHERE pt.pack_type_id = ? AND bp.pack_id IS NULL
-            LIMIT 1
-        ");
+    /**
+     * Create a new physical pack instance for an opening (one row per purchase).
+     */
+    public function createPackInstance($packTypeId) {
+        $stmt = $this->pdo->prepare("INSERT INTO pack (pack_type_id) VALUES (?)");
         $stmt->execute([$packTypeId]);
-        $result = $stmt->fetchColumn();
+        $id = (int) $this->pdo->lastInsertId();
         $stmt->closeCursor();
-        return $result;
+        return $id;
     }
 
     public function recordPurchase($packId, $username) {
@@ -59,7 +56,9 @@ class Pack {
         $cards   = $setData['cards'] ?? [];
 
         if (empty($cards)) {
-            throw new Exception("No cards found for set '{$packTypeId}'");
+            throw new Exception(
+                "This set has no cards in the card database (common for some promotional or special sets). Try Base Set, Jungle, or Fossil."
+            );
         }
 
         // Pick 5 random cards

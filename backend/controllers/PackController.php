@@ -34,14 +34,11 @@ class PackController {
             return ["error" => "Pack type not found"];
         }
 
-        $packId = $this->packModel->getAvailablePack($packTypeName);
-        if (!$packId) {
-            http_response_code(409);
-            return ["error" => "No packs of this type available"];
-        }
-
         $this->pdo->beginTransaction();
         try {
+            // New pack row per purchase so each trainer can open the same set many times (inventory is not finite).
+            $packId = $this->packModel->createPackInstance($packType['pack_type_id']);
+
             $deducted = $this->userModel->deductBalance($username, $packType['pack_price']);
             if (!$deducted) {
                 $this->pdo->rollBack();
