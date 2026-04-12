@@ -13,6 +13,10 @@ if ($method === 'GET') {
     $data = json_decode(file_get_contents('php://input'), true);
     echo json_encode($controller->buyCard($data['listing_id']));
 
+} elseif ($method === 'POST' && $action === 'remove') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    echo json_encode($controller->removeListing($data['listing_id'] ?? null));
+
 } elseif ($method === 'POST' && $action === 'update_price') {
     $data = json_decode(file_get_contents('php://input'), true);
     echo json_encode($controller->updateListingPrice($data['listing_id'] ?? null, $data['price'] ?? null));

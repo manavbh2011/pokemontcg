@@ -248,7 +248,7 @@ function renderMarketGrid() {
            </div>`
         : `<p>${priceNum} coins</p>`;
       const actionBlock = isMine
-        ? `<p class="muted">Your listing</p>`
+        ? `<button type="button" class="button-secondary" onclick="removeListing(${lid})">Remove listing</button>`
         : `<button type="button" onclick="buyCard(${lid})">Buy</button>`;
       return `
     <div class="card">
@@ -301,6 +301,18 @@ async function loadMarket() {
   marketListingsCache = cards;
   populateMarketFilterSelects(cards);
   renderMarketGrid();
+}
+
+async function removeListing(listingId) {
+  const res = await fetchData("market.php?action=remove", {
+    method: "POST",
+    body: JSON.stringify({ listing_id: listingId })
+  });
+  if (res?.success) {
+    loadMarket();
+  } else {
+    setMarketNotice(res?.error ?? "Could not remove listing.", "error");
+  }
 }
 
 async function buyCard(listingId) {

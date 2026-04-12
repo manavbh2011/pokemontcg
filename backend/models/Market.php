@@ -65,6 +65,12 @@ class Market {
         $stmt->closeCursor();
     }
 
+    public function deleteListing($listingId) {
+        $stmt = $this->pdo->prepare("DELETE FROM listing WHERE listing_id = ?");
+        $stmt->execute([$listingId]);
+        $stmt->closeCursor();
+    }
+
     public function updateListingPrice($listingId, $price) {
         $stmt = $this->pdo->prepare("UPDATE listing SET card_price = ? WHERE listing_id = ?");
         $stmt->execute([$price, $listingId]);

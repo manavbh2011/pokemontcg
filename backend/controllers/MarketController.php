@@ -83,6 +83,27 @@ class MarketController {
         return ["success" => true];
     }
 
+    public function removeListing($listingId) {
+        if (!isset($_SESSION['username'])) {
+            http_response_code(401);
+            return ["error" => "Not logged in"];
+        }
+
+        $listingId = (int) $listingId;
+        $listing = $this->marketModel->getListing($listingId);
+        if (!$listing) {
+            http_response_code(404);
+            return ["error" => "Listing not found"];
+        }
+        if ($listing['seller'] !== $_SESSION['username']) {
+            http_response_code(403);
+            return ["error" => "Not your listing"];
+        }
+
+        $this->marketModel->deleteListing($listingId);
+        return ["success" => true];
+    }
+
     public function buyCard($listingId) {
         if (!isset($_SESSION['username'])) {
             http_response_code(401);
