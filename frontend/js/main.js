@@ -393,6 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const showcaseUsername = $("showcase-username");
   if (showcaseUsername) showcaseUsername.textContent = localStorage.getItem("name") ?? "User";
 
+  const profileUsername = $("profile-username");
+  if (profileUsername) {
+    profileUsername.textContent = localStorage.getItem("username") ?? "Trainer";
+  }
+
   const closeModal = $("close-modal");
   if (closeModal) closeModal.onclick = () => $("pack-open-modal").close();
 
