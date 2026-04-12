@@ -2,18 +2,21 @@
 require_once __DIR__ . '/../models/Market.php';
 require_once __DIR__ . '/../models/Card.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Showcase.php';
 
 class MarketController {
     private $marketModel;
     private $cardModel;
     private $userModel;
+    private $showcaseModel;
     private $pdo;
 
     public function __construct($pdo) {
         $this->pdo         = $pdo;
-        $this->marketModel = new Market($pdo);
-        $this->cardModel   = new Card($pdo);
-        $this->userModel   = new User($pdo);
+        $this->marketModel  = new Market($pdo);
+        $this->cardModel    = new Card($pdo);
+        $this->userModel    = new User($pdo);
+        $this->showcaseModel = new Showcase($pdo);
     }
 
     public function getListings() {
@@ -137,6 +140,7 @@ class MarketController {
 
             $this->userModel->addBalance($seller, $listing['card_price']);
             $this->cardModel->transferOwnership($listing['card_id'], $buyer);
+            $this->showcaseModel->removeCardFromAllShowcases($listing['card_id']);
             $this->marketModel->recordTransaction($listingId, $seller, $buyer);
 
             $this->pdo->commit();

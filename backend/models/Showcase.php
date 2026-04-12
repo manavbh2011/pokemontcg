@@ -14,6 +14,12 @@ class Showcase {
         return $result;
     }
 
+    public function removeCardFromAllShowcases($cardId) {
+        $stmt = $this->pdo->prepare("DELETE FROM showcase_cards WHERE card_id = ?");
+        $stmt->execute([$cardId]);
+        $stmt->closeCursor();
+    }
+
     public function createShowcaseIfNotExists($username) {
         $stmt = $this->pdo->prepare("SELECT showcase_id FROM showcase WHERE username = ? LIMIT 1");
         $stmt->execute([$username]);
