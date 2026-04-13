@@ -114,14 +114,20 @@ async function handleLogin() {
       if (res.balance != null) setBalanceDisplay(res.balance);
       localStorage.setItem("username", res.username);
       localStorage.setItem("name", res.name);
-      const next = new URLSearchParams(window.location.search).get("required");
-      const dest = {
-        packs: "packs.html",
-        market: "market.html",
-        collection: "collection.html",
-        showcase: "showcase.html"
-      }[next];
-      window.location.href = dest || "market.html";
+      if (res.is_admin) {
+        localStorage.setItem("is_admin", "true");
+        window.location.href = "admin.html";
+      } else {
+        localStorage.removeItem("is_admin");
+        const next = new URLSearchParams(window.location.search).get("required");
+        const dest = {
+          packs: "packs.html",
+          market: "market.html",
+          collection: "collection.html",
+          showcase: "showcase.html"
+        }[next];
+        window.location.href = dest || "market.html";
+      }
     } else {
       const msg =
         res?.error ||
@@ -788,4 +794,10 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPacks();
 
   setupSellModal();
+
+  if (localStorage.getItem("is_admin") === "true") {
+    document.querySelectorAll(".admin-nav-link").forEach((el) => {
+      el.style.display = "";
+    });
+  }
 });

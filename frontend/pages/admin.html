@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokemon Trader - Admin</title>
+  <script src="../js/auth-guard.js"></script>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    .sets-toolbar {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .sets-toolbar input {
+      flex: 1;
+      min-width: 180px;
+    }
+    #tcgdex-sets-table td, #tcgdex-sets-table th {
+      padding: 0.6rem 0.8rem;
+      vertical-align: middle;
+    }
+    #tcgdex-sets-table th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    #tcgdex-sets-table tr {
+      border-bottom: 1px solid var(--border);
+    }
+    #tcgdex-sets-table tr.row-added {
+      opacity: 0.45;
+    }
+    .price-input {
+      width: 90px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 0.3rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    .price-input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+    .tag-added {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(102, 227, 164, 0.15);
+      color: var(--green);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="nav-shell">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark"></span>
+        <span>Pokemon Trader</span>
+      </a>
+      <nav class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="packs.html">Packs</a>
+        <a href="market.html">Market</a>
+        <a href="collection.html">Collection</a>
+        <a href="showcase.html">Showcase</a>
+        <a href="user.html">Trainers</a>
+        <a class="active" href="admin.html">Admin</a>
+        <a href="login.html" data-logout>Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+
+    <!-- TCGdex Set Browser -->
+    <section class="panel section-card">
+      <span class="eyebrow">Admin Dashboard</span>
+      <h1>Pack Management</h1>
+      <p class="muted">Browse all TCGdex sets and add them to the shop with a custom price.</p>
+
+      <div style="margin-top:1.5rem;">
+        <div class="sets-toolbar">
+          <button class="btn" id="load-sets-btn">Load Sets from TCGdex</button>
+          <input class="form-input" id="sets-search" type="search" placeholder="Filter sets…" style="display:none;" />
+        </div>
+        <p id="sets-notice" class="form-notice" hidden></p>
+        <div style="overflow-x:auto;" id="sets-table-wrap" hidden>
+          <table id="tcgdex-sets-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price (coins)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tcgdex-sets-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Existing Packs Table -->
+    <section class="panel section-card" style="margin-top:1.5rem;">
+      <h2 style="font-size:1.1rem;margin-bottom:1rem;">Active Packs in Shop</h2>
+      <p id="packs-notice" class="form-notice" hidden></p>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);text-align:left;">
+              <th style="padding:0.6rem 0.8rem;color:var(--muted);font-weight:600;font-size:0.85rem;">ID</th>
+              <th style="padding:0.6rem 0.8rem;color:var(--muted);font-weight:600;font-size:0.85rem;">Name</th>
+              <th style="padding:0.6rem 0.8rem;color:var(--muted);font-weight:600;font-size:0.85rem;">Price</th>
+              <th style="padding:0.6rem 0.8rem;color:var(--muted);font-weight:600;font-size:0.85rem;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-packs-body">
+            <tr><td colspan="4" style="padding:1rem 0.8rem;color:var(--muted);">Loading packs…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Edit Price Dialog -->
+  <dialog id="edit-price-modal">
+    <div class="dialog-body">
+      <h2>Edit Pack Price</h2>
+      <p id="edit-pack-label" class="muted" style="margin-bottom:1rem;"></p>
+      <form id="edit-price-form" style="display:grid;gap:0.75rem;">
+        <input type="hidden" id="edit-pack-id" />
+        <div style="display:grid;gap:0.4rem;">
+          <label class="form-label" for="edit-price-input">New Price (coins)</label>
+          <input class="form-input" id="edit-price-input" type="number" min="1" step="1" required />
+        </div>
+        <p id="edit-price-notice" class="form-notice" hidden></p>
+        <div class="dialog-actions">
+          <button class="btn" type="submit">Save</button>
+          <button class="btn" type="button" id="edit-price-cancel" style="background:var(--bg-soft);">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Delete Confirm Dialog -->
+  <dialog id="delete-pack-modal">
+    <div class="dialog-body">
+      <h2>Delete Pack Type</h2>
+      <p id="delete-pack-label" class="muted" style="margin-bottom:1rem;"></p>
+      <p style="color:var(--pink);font-size:0.9rem;">This cannot be undone. The pack will no longer appear in the shop.</p>
+      <input type="hidden" id="delete-pack-id" />
+      <p id="delete-pack-notice" class="form-notice" hidden></p>
+      <div class="dialog-actions" style="margin-top:1rem;">
+        <button class="btn" id="delete-pack-confirm" style="background:rgba(255,80,80,0.2);color:var(--pink);">Delete</button>
+        <button class="btn" id="delete-pack-cancel" style="background:var(--bg-soft);">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/logout.js"></script>
+  <script>
+    const ADMIN_API = API_BASE + "/admin.php";
+
+    async function adminFetch(url, options = {}) {
+      const res = await fetch(url, {
+        headers: { "Content-Type": "application/json", ...options.headers },
+        credentials: "include",
+        ...options
+      });
+      return res.json();
+    }
+
+    function setNotice(id, message, isError = true) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (!message) { el.hidden = true; el.textContent = ""; return; }
+      el.textContent = message;
+      el.hidden = false;
+      el.className = "form-notice " + (isError ? "form-notice--error" : "form-notice--success");
+    }
+
+    function formatCoins(v) {
+      return Number(v).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+
+    // ---- Active packs table ----
+    async function loadAdminPacks() {
+      const data = await adminFetch(ADMIN_API + "?action=packs");
+      const tbody = document.getElementById("admin-packs-body");
+
+      if (!data || data.error) {
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:1rem 0.8rem;color:var(--pink);">${data?.error || "Failed to load packs."}</td></tr>`;
+        return;
+      }
+      if (!data.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:1rem 0.8rem;color:var(--muted);">No packs in shop yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map((p) => `
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:0.75rem 0.8rem;font-size:0.9rem;font-family:monospace;">${escHtml(p.pack_type_id)}</td>
+          <td style="padding:0.75rem 0.8rem;">${escHtml(p.pack_type_name)}</td>
+          <td style="padding:0.75rem 0.8rem;color:var(--yellow);">${formatCoins(p.pack_price)} coins</td>
+          <td style="padding:0.75rem 0.8rem;display:flex;gap:0.5rem;">
+            <button class="btn btn-edit" data-id="${escHtml(p.pack_type_id)}" data-name="${escHtml(p.pack_type_name)}" data-price="${p.pack_price}"
+              style="font-size:0.8rem;padding:0.3rem 0.7rem;">Edit Price</button>
+            <button class="btn btn-delete" data-id="${escHtml(p.pack_type_id)}" data-name="${escHtml(p.pack_type_name)}"
+              style="font-size:0.8rem;padding:0.3rem 0.7rem;background:rgba(255,80,80,0.15);color:var(--pink);">Delete</button>
+          </td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll(".btn-edit").forEach((btn) => {
+        btn.addEventListener("click", () => openEditModal(btn.dataset.id, btn.dataset.name, btn.dataset.price));
+      });
+      document.querySelectorAll(".btn-delete").forEach((btn) => {
+        btn.addEventListener("click", () => openDeleteModal(btn.dataset.id, btn.dataset.name));
+      });
+    }
+
+    // ---- TCGdex set browser ----
+    let allSets = [];
+
+    function escHtml(str) {
+      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    }
+
+    function renderSetsTable(sets) {
+      const tbody = document.getElementById("tcgdex-sets-body");
+      if (!sets.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted);padding:1rem 0;">No sets match your filter.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = sets.map((s) => {
+        const added = s.already_added;
+        return `
+          <tr class="${added ? "row-added" : ""}" data-id="${escHtml(s.id)}">
+            <td style="font-family:monospace;font-size:0.9rem;">${escHtml(s.id)}</td>
+            <td>${escHtml(s.name)}</td>
+            <td>
+              ${added
+                ? `<span style="color:var(--muted);font-size:0.85rem;">—</span>`
+                : `<input class="price-input" type="number" min="1" step="1" value="500" aria-label="Price for ${escHtml(s.name)}" />`
+              }
+            </td>
+            <td>
+              ${added
+                ? `<span class="tag-added">Added</span>`
+                : `<button class="btn btn-add-set" data-id="${escHtml(s.id)}" data-name="${escHtml(s.name)}"
+                    style="font-size:0.8rem;padding:0.3rem 0.8rem;">Add</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      tbody.querySelectorAll(".btn-add-set").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const row = btn.closest("tr");
+          const priceInput = row.querySelector(".price-input");
+          addSetFromTcgdex(btn.dataset.id, btn.dataset.name, parseFloat(priceInput.value), btn);
+        });
+      });
+    }
+
+    async function addSetFromTcgdex(id, name, price, btn) {
+      setNotice("sets-notice", "");
+      if (!price || price <= 0) {
+        setNotice("sets-notice", `Enter a valid price for "${name}".`);
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = "Adding…";
+
+      const description = `Pack from the ${name} set.`;
+      const res = await adminFetch(ADMIN_API + "?action=add_pack", {
+        method: "POST",
+        body: JSON.stringify({ pack_type_id: id, pack_type_name: name, pack_type_description: description, pack_price: price })
+      });
+
+      if (res?.success) {
+        // Mark as added in local state and re-render
+        const entry = allSets.find((s) => s.id === id);
+        if (entry) entry.already_added = true;
+        applyFilter();
+        await loadAdminPacks();
+        setNotice("sets-notice", `"${name}" added to shop.`, false);
+      } else {
+        btn.disabled = false;
+        btn.textContent = "Add";
+        setNotice("sets-notice", res?.error || `Failed to add "${name}".`);
+      }
+    }
+
+    function applyFilter() {
+      const q = document.getElementById("sets-search").value.trim().toLowerCase();
+      const filtered = q ? allSets.filter((s) => s.id.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)) : allSets;
+      renderSetsTable(filtered);
+    }
+
+    document.getElementById("load-sets-btn").addEventListener("click", async () => {
+      const btn = document.getElementById("load-sets-btn");
+      const searchInput = document.getElementById("sets-search");
+      const tableWrap = document.getElementById("sets-table-wrap");
+
+      btn.disabled = true;
+      btn.textContent = "Loading…";
+      setNotice("sets-notice", "");
+
+      const data = await adminFetch(ADMIN_API + "?action=tcgdex_sets");
+
+      btn.disabled = false;
+      btn.textContent = "Reload Sets";
+
+      if (!data || data.error) {
+        setNotice("sets-notice", data?.error || "Failed to fetch TCGdex sets.");
+        return;
+      }
+
+      allSets = data;
+      searchInput.style.display = "";
+      tableWrap.hidden = false;
+      applyFilter();
+    });
+
+    document.getElementById("sets-search").addEventListener("input", applyFilter);
+
+    // ---- Edit Price Modal ----
+    const editModal = document.getElementById("edit-price-modal");
+
+    function openEditModal(id, name, price) {
+      document.getElementById("edit-pack-id").value = id;
+      document.getElementById("edit-pack-label").textContent = name;
+      document.getElementById("edit-price-input").value = price;
+      setNotice("edit-price-notice", "");
+      editModal.showModal();
+    }
+
+    document.getElementById("edit-price-cancel").addEventListener("click", () => editModal.close());
+
+    document.getElementById("edit-price-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setNotice("edit-price-notice", "");
+      const packTypeId = document.getElementById("edit-pack-id").value;
+      const price = parseFloat(document.getElementById("edit-price-input").value);
+
+      const res = await adminFetch(ADMIN_API + "?action=update_price", {
+        method: "POST",
+        body: JSON.stringify({ pack_type_id: packTypeId, price })
+      });
+      if (res?.success) {
+        editModal.close();
+        await loadAdminPacks();
+      } else {
+        setNotice("edit-price-notice", res?.error || "Failed to update price.");
+      }
+    });
+
+    // ---- Delete Modal ----
+    const deleteModal = document.getElementById("delete-pack-modal");
+
+    function openDeleteModal(id, name) {
+      document.getElementById("delete-pack-id").value = id;
+      document.getElementById("delete-pack-label").textContent = `Are you sure you want to delete "${name}"?`;
+      setNotice("delete-pack-notice", "");
+      deleteModal.showModal();
+    }
+
+    document.getElementById("delete-pack-cancel").addEventListener("click", () => deleteModal.close());
+
+    document.getElementById("delete-pack-confirm").addEventListener("click", async () => {
+      setNotice("delete-pack-notice", "");
+      const packTypeId = document.getElementById("delete-pack-id").value;
+
+      const res = await adminFetch(ADMIN_API + "?action=delete_pack", {
+        method: "POST",
+        body: JSON.stringify({ pack_type_id: packTypeId })
+      });
+      if (res?.success) {
+        deleteModal.close();
+        // If sets are loaded, mark it as not added
+        const entry = allSets.find((s) => s.id === packTypeId);
+        if (entry) { entry.already_added = false; applyFilter(); }
+        await loadAdminPacks();
+      } else {
+        setNotice("delete-pack-notice", res?.error || "Failed to delete pack.");
+      }
+    });
+
+    loadAdminPacks();
+  </script>
+</body>
+
+</html>

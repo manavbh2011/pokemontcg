@@ -14,6 +14,7 @@
         localStorage.removeItem("username");
         localStorage.removeItem("name");
         localStorage.removeItem("balance");
+        localStorage.removeItem("is_admin");
         window.location.href = dest;
       });
   });

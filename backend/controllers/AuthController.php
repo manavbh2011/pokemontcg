@@ -9,6 +9,25 @@ class AuthController {
     }
 
     public function login($username, $password) {
+        $adminUsername = getenv('ADMIN_USERNAME');
+        $adminPassword = getenv('ADMIN_PASSWORD');
+
+        if ($adminUsername && $username === $adminUsername) {
+            if ($password !== $adminPassword) {
+                http_response_code(401);
+                return ["error" => "Invalid username or password"];
+            }
+            $_SESSION['username'] = $adminUsername;
+            $_SESSION['name']     = 'Admin';
+            $_SESSION['is_admin'] = true;
+            return [
+                "username" => $adminUsername,
+                "name"     => "Admin",
+                "balance"  => 0,
+                "is_admin" => true
+            ];
+        }
+
         $trainer = $this->userModel->findByUsername($username);
 
         if (!$trainer || !password_verify($password, $trainer['password_hash'])) {
@@ -64,6 +83,14 @@ class AuthController {
         if (!isset($_SESSION['username'])) {
             http_response_code(401);
             return ["error" => "Not logged in"];
+        }
+        if (!empty($_SESSION['is_admin'])) {
+            return [
+                "username" => $_SESSION['username'],
+                "name"     => "Admin",
+                "balance"  => 0,
+                "is_admin" => true
+            ];
         }
         $trainer = $this->userModel->findByUsername($_SESSION['username']);
         if (!$trainer) {
