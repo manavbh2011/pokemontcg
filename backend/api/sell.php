@@ -10,7 +10,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = readJsonBody();
+if ($data === null) {
+    exit;
+}
 $cardId = $data['card_id'] ?? null;
 $price  = $data['price'] ?? null;
 

@@ -11,12 +11,18 @@ if ($method === 'GET' && isset($_GET['username'])) {
     echo json_encode($controller->getShowcase($_GET['username']));
 
 } elseif ($method === 'POST' && $action === 'add') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    echo json_encode($controller->addCard($data['username'], $data['card_id']));
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
+    echo json_encode($controller->addCard($data['card_id'] ?? null));
 
 } elseif ($method === 'POST' && $action === 'remove') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    echo json_encode($controller->removeCard($data['username'], $data['card_id']));
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
+    echo json_encode($controller->removeCard($data['card_id'] ?? null));
 
 } else {
     http_response_code(400);

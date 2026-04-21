@@ -10,8 +10,11 @@ if ($method === 'GET') {
     echo json_encode($controller->getAvailablePacks());
 
 } elseif ($method === 'POST' && $action === 'buy') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    echo json_encode($controller->buyPack($data['pack_type_id']));
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
+    echo json_encode($controller->buyPack($data['pack_type_id'] ?? ''));
 
 } else {
     http_response_code(400);

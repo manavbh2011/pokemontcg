@@ -10,15 +10,24 @@ if ($method === 'GET') {
     echo json_encode($controller->getListings());
 
 } elseif ($method === 'POST' && $action === 'buy') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    echo json_encode($controller->buyCard($data['listing_id']));
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
+    echo json_encode($controller->buyCard($data['listing_id'] ?? null));
 
 } elseif ($method === 'POST' && $action === 'remove') {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
     echo json_encode($controller->removeListing($data['listing_id'] ?? null));
 
 } elseif ($method === 'POST' && $action === 'update_price') {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
     echo json_encode($controller->updateListingPrice($data['listing_id'] ?? null, $data['price'] ?? null));
 
 } else {

@@ -19,15 +19,24 @@ if ($method === 'GET' && $action === 'packs') {
     echo json_encode($controller->getTcgdexSets());
 
 } elseif ($method === 'POST' && $action === 'add_pack') {
-    $data = json_decode(file_get_contents("php://input"), true);
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
     echo json_encode($controller->addPackType($data));
 
 } elseif ($method === 'POST' && $action === 'update_price') {
-    $data = json_decode(file_get_contents("php://input"), true);
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
     echo json_encode($controller->updatePackPrice($data['pack_type_id'] ?? '', $data['price'] ?? 0));
 
 } elseif ($method === 'POST' && $action === 'delete_pack') {
-    $data = json_decode(file_get_contents("php://input"), true);
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
     echo json_encode($controller->deletePackType($data['pack_type_id'] ?? ''));
 
 } else {

@@ -21,12 +21,18 @@ if ($method === 'GET' && $action === 'me') {
     echo json_encode($controller->getProfile($_GET['username'] ?? ''));
 
 } elseif ($method === 'POST' && $action === 'login') {
-    $data = json_decode(file_get_contents("php://input"), true);
-    echo json_encode($controller->login($data['username'], $data['password']));
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
+    echo json_encode($controller->login($data['username'] ?? '', $data['password'] ?? ''));
 
 } elseif ($method === 'POST' && $action === 'register') {
-    $data = json_decode(file_get_contents("php://input"), true);
-    echo json_encode($controller->register($data['username'], $data['name'], $data['password']));
+    $data = readJsonBody();
+    if ($data === null) {
+        exit;
+    }
+    echo json_encode($controller->register($data['username'] ?? '', $data['name'] ?? '', $data['password'] ?? ''));
 
 } elseif ($method === 'POST' && $action === 'logout') {
     echo json_encode($controller->logout());
