@@ -201,7 +201,7 @@
       const tbody = document.getElementById("admin-packs-body");
 
       if (!data || data.error) {
-        tbody.innerHTML = `<tr><td colspan="4" style="padding:1rem 0.8rem;color:var(--pink);">${data?.error || "Failed to load packs."}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:1rem 0.8rem;color:var(--pink);">${escHtml(data?.error || "Failed to load packs.")}</td></tr>`;
         return;
       }
       if (!data.length) {
@@ -235,7 +235,12 @@
     let allSets = [];
 
     function escHtml(str) {
-      return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      return String(str)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#39;");
     }
 
     function renderSetsTable(sets) {

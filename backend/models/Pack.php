@@ -45,7 +45,7 @@ class Pack {
         return $result;
     }
 
-    public function fetchAndStoreCards($packTypeId, $packId, $username) {
+    public function fetchPackCardData($packTypeId) {
         // Fetch all cards in the set
         $setResponse = file_get_contents("https://api.tcgdex.net/v2/en/sets/{$packTypeId}");
         if ($setResponse === false) {
@@ -64,7 +64,7 @@ class Pack {
         // Pick 5 random cards
         shuffle($cards);
         $selected = array_slice($cards, 0, 5);
-        $stored   = [];
+        $stored = [];
 
         foreach ($selected as $cardStub) {
             $cardId = $cardStub['id'];
@@ -83,27 +83,6 @@ class Pack {
             $level      = $card['rarity'] ?? 'Unknown';
             $hp         = $card['hp'] ?? 0;
 
-            // Insert into card_info if not already present
-            $check = $this->pdo->prepare("SELECT 1 FROM card_info WHERE card_info_id = ?");
-            $check->execute([$cardInfoId]);
-            $exists = $check->fetchColumn();
-            $check->closeCursor();
-
-            if (!$exists) {
-                $stmt = $this->pdo->prepare(
-                    "INSERT INTO card_info (card_info_id, card_name, type, level, hp) VALUES (?, ?, ?, ?, ?)"
-                );
-                $stmt->execute([$cardInfoId, $cardName, $type, $level, $hp]);
-                $stmt->closeCursor();
-            }
-
-            // Insert into card
-            $stmt = $this->pdo->prepare(
-                "INSERT INTO card (card_info_id, pack_id, username) VALUES (?, ?, ?)"
-            );
-            $stmt->execute([$cardInfoId, $packId, $username]);
-            $stmt->closeCursor();
-
             $stored[] = [
                 "card_info_id" => $cardInfoId,
                 "card_name"    => $cardName,
@@ -114,5 +93,34 @@ class Pack {
         }
 
         return $stored;
+    }
+
+    public function storePackCards(array $cards, $packId, $username) {
+        foreach ($cards as $card) {
+            $check = $this->pdo->prepare("SELECT 1 FROM card_info WHERE card_info_id = ?");
+            $check->execute([$card['card_info_id']]);
+            $exists = $check->fetchColumn();
+            $check->closeCursor();
+
+            if (!$exists) {
+                $stmt = $this->pdo->prepare(
+                    "INSERT INTO card_info (card_info_id, card_name, type, level, hp) VALUES (?, ?, ?, ?, ?)"
+                );
+                $stmt->execute([
+                    $card['card_info_id'],
+                    $card['card_name'],
+                    $card['type'],
+                    $card['level'],
+                    $card['hp'],
+                ]);
+                $stmt->closeCursor();
+            }
+
+            $stmt = $this->pdo->prepare(
+                "INSERT INTO card (card_info_id, pack_id, username) VALUES (?, ?, ?)"
+            );
+            $stmt->execute([$card['card_info_id'], $packId, $username]);
+            $stmt->closeCursor();
+        }
     }
 }

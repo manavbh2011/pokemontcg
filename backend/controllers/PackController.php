@@ -34,6 +34,13 @@ class PackController {
             return ["error" => "Pack type not found"];
         }
 
+        try {
+            $cards = $this->packModel->fetchPackCardData($packType['pack_type_id']);
+        } catch (Exception $e) {
+            http_response_code(502);
+            return ["error" => $e->getMessage()];
+        }
+
         $this->pdo->beginTransaction();
         try {
             // New pack row per purchase so each trainer can open the same set many times (inventory is not finite).
@@ -47,7 +54,7 @@ class PackController {
             }
 
             $this->packModel->recordPurchase($packId, $username);
-            $cards = $this->packModel->fetchAndStoreCards($packType['pack_type_id'], $packId, $username);
+            $this->packModel->storePackCards($cards, $packId, $username);
 
             $this->pdo->commit();
             $after = $this->userModel->findByUsername($username);
@@ -60,7 +67,7 @@ class PackController {
         } catch (Exception $e) {
             $this->pdo->rollBack();
             http_response_code(500);
-            return ["error" => $e->getMessage()];
+            return ["error" => "Could not open pack"];
         }
     }
 }

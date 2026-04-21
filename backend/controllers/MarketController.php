@@ -114,13 +114,24 @@ class MarketController {
         }
 
         $buyer = $_SESSION['username'];
+        $listingId = (int) $listingId;
+        if ($listingId <= 0) {
+            http_response_code(400);
+            return ["error" => "Invalid listing"];
+        }
 
         $this->pdo->beginTransaction();
         try {
-            $listing = $this->marketModel->getListing($listingId);
+            $listing = $this->marketModel->getListingForUpdate($listingId);
             if (!$listing) {
                 $this->pdo->rollBack();
                 http_response_code(404);
+                return ["error" => "Listing not found or already sold"];
+            }
+
+            if ($this->marketModel->hasRecordedTransaction($listingId)) {
+                $this->pdo->rollBack();
+                http_response_code(409);
                 return ["error" => "Listing not found or already sold"];
             }
 
@@ -138,10 +149,10 @@ class MarketController {
                 return ["error" => "Insufficient balance"];
             }
 
+            $this->marketModel->recordTransaction($listingId, $seller, $buyer);
             $this->userModel->addBalance($seller, $listing['card_price']);
             $this->cardModel->transferOwnership($listing['card_id'], $buyer);
             $this->showcaseModel->removeCardFromAllShowcases($listing['card_id']);
-            $this->marketModel->recordTransaction($listingId, $seller, $buyer);
 
             $this->pdo->commit();
             $buyerRow = $this->userModel->findByUsername($buyer);
@@ -151,10 +162,18 @@ class MarketController {
                 "card_id"  => $listing['card_id'],
                 "balance"  => $buyerRow["balance"]
             ];
+        } catch (PDOException $e) {
+            $this->pdo->rollBack();
+            if ((int) $e->getCode() === 23000) {
+                http_response_code(409);
+                return ["error" => "Listing not found or already sold"];
+            }
+            http_response_code(500);
+            return ["error" => "Could not complete purchase"];
         } catch (Exception $e) {
             $this->pdo->rollBack();
             http_response_code(500);
-            return ["error" => $e->getMessage()];
+            return ["error" => "Could not complete purchase"];
         }
     }
 }

@@ -20,6 +20,25 @@ function $(id) {
   return document.getElementById(id);
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function safeImageUrl(url) {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url, window.location.href);
+    return ["http:", "https:"].includes(parsed.protocol) ? parsed.href : "";
+  } catch (e) {
+    return "";
+  }
+}
+
 function setFormNotice(el, message) {
   if (!el) return;
   if (message) {
@@ -86,9 +105,9 @@ async function loadProfileFromApi() {
 function createCardHTML(card) {
   return `
     <div class="card">
-      <img src="${card.image || ''}" alt="${card.name}" />
-      <h3>${card.name}</h3>
-      <p>${card.rarity || ''}</p>
+      <img src="${safeImageUrl(card.image)}" alt="${escapeHtml(card.name)}" />
+      <h3>${escapeHtml(card.name)}</h3>
+      <p>${escapeHtml(card.rarity || "")}</p>
     </div>
   `;
 }
@@ -250,23 +269,38 @@ function renderMarketGrid() {
         ? `<div class="market-price-row">
              <label for="listing-price-${lid}">Price (coins)</label>
              <input type="number" id="listing-price-${lid}" min="1" step="1" value="${priceNum}" />
-             <button type="button" class="button-secondary" onclick="saveListingPrice(${lid})">Save</button>
+             <button type="button" class="button-secondary" data-market-action="save-price" data-listing-id="${lid}">Save</button>
            </div>`
         : `<p>${priceNum} coins</p>`;
       const actionBlock = isMine
-        ? `<button type="button" class="button-secondary" onclick="removeListing(${lid})">Remove listing</button>`
-        : `<button type="button" onclick="buyCard(${lid})">Buy</button>`;
+        ? `<button type="button" class="button-secondary" data-market-action="remove" data-listing-id="${lid}">Remove listing</button>`
+        : `<button type="button" data-market-action="buy" data-listing-id="${lid}">Buy</button>`;
       return `
     <div class="card">
-      <img src="${card.imageURL}" alt="${card.card_name}" style="width:120px;border-radius:8px;" />
-      <h3>${card.card_name}</h3>
-      <p>${card.type} · ${card.level}</p>
+      <img src="${safeImageUrl(card.imageURL)}" alt="${escapeHtml(card.card_name)}" style="width:120px;border-radius:8px;" />
+      <h3>${escapeHtml(card.card_name)}</h3>
+      <p>${escapeHtml(card.type)} · ${escapeHtml(card.level)}</p>
       ${priceBlock}
       ${actionBlock}
     </div>
   `;
     })
     .join("");
+
+  grid.querySelectorAll("[data-market-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const listingId = Number(button.dataset.listingId);
+      if (!Number.isFinite(listingId)) return;
+
+      if (button.dataset.marketAction === "save-price") {
+        void saveListingPrice(listingId);
+      } else if (button.dataset.marketAction === "remove") {
+        void removeListing(listingId);
+      } else if (button.dataset.marketAction === "buy") {
+        void buyCard(listingId);
+      }
+    });
+  });
 }
 
 function setupMarketFilters() {
@@ -406,10 +440,10 @@ async function loadCollection() {
 
   grid.innerHTML = withImages.map(c => `
     <div class="card-shell">
-      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
+      <img src="${safeImageUrl(c.imageURL)}" alt="${escapeHtml(c.card_name)}" style="width:120px;border-radius:12px;" />
       <div>
-        <h3>${c.card_name}</h3>
-        <p class="muted">${c.type} · ${c.level}</p>
+        <h3>${escapeHtml(c.card_name)}</h3>
+        <p class="muted">${escapeHtml(c.type)} · ${escapeHtml(c.level)}</p>
       </div>
     </div>
   `).join("");
@@ -441,21 +475,29 @@ async function loadShowcase() {
 
   grid.innerHTML = withImages.map(c => `
     <div class="card-shell">
-      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
+      <img src="${safeImageUrl(c.imageURL)}" alt="${escapeHtml(c.card_name)}" style="width:120px;border-radius:12px;" />
       <div style="margin-top:auto;">
-        <h3>${c.card_name}</h3>
-        <p class="muted">${c.type} · ${c.level}</p>
-        <button onclick="removeFromShowcase(${c.card_id})">Remove</button>
+        <h3>${escapeHtml(c.card_name)}</h3>
+        <p class="muted">${escapeHtml(c.type)} · ${escapeHtml(c.level)}</p>
+        <button data-showcase-action="remove" data-card-id="${Number(c.card_id)}">Remove</button>
       </div>
     </div>
   `).join("");
+
+  grid.querySelectorAll("[data-showcase-action='remove']").forEach((button) => {
+    button.addEventListener("click", () => {
+      const cardId = Number(button.dataset.cardId);
+      if (Number.isFinite(cardId)) {
+        void removeFromShowcase(cardId);
+      }
+    });
+  });
 }
 
 async function removeFromShowcase(cardId) {
-  const username = localStorage.getItem("username");
   await fetchData("showcase.php?action=remove", {
     method: "POST",
-    body: JSON.stringify({ username, card_id: cardId })
+    body: JSON.stringify({ card_id: cardId })
   });
   loadShowcase();
 }
@@ -488,20 +530,28 @@ async function openAddToShowcaseModal() {
   }));
 
   list.innerHTML = withImages.map(c => `
-    <div class="card-shell" style="cursor:pointer;" onclick="addToShowcase(${c.card_id})">
-      <img src="${c.imageURL}" alt="${c.card_name}" style="border-radius:12px;" />
-      <div><h3>${c.card_name}</h3><p class="muted">${c.type} · ${c.level}</p></div>
+    <div class="card-shell" style="cursor:pointer;" data-showcase-action="add" data-card-id="${Number(c.card_id)}">
+      <img src="${safeImageUrl(c.imageURL)}" alt="${escapeHtml(c.card_name)}" style="border-radius:12px;" />
+      <div><h3>${escapeHtml(c.card_name)}</h3><p class="muted">${escapeHtml(c.type)} · ${escapeHtml(c.level)}</p></div>
     </div>
   `).join("");
+
+  list.querySelectorAll("[data-showcase-action='add']").forEach((item) => {
+    item.addEventListener("click", () => {
+      const cardId = Number(item.dataset.cardId);
+      if (Number.isFinite(cardId)) {
+        void addToShowcase(cardId);
+      }
+    });
+  });
 
   $("add-to-showcase-modal").showModal();
 }
 
 async function addToShowcase(cardId) {
-  const username = localStorage.getItem("username");
   const res = await fetchData("showcase.php?action=add", {
     method: "POST",
-    body: JSON.stringify({ username, card_id: cardId })
+    body: JSON.stringify({ card_id: cardId })
   });
   if (res?.success) {
     $("add-to-showcase-modal").close();
@@ -525,15 +575,26 @@ function setupTrainerSearch() {
     debounce = setTimeout(async () => {
       const data = await fetchData(`auth.php?action=search&q=${encodeURIComponent(q)}`);
       if (!data || !data.length) { suggestions.style.display = "none"; return; }
-      suggestions.innerHTML = data.map(u => `
-        <li style="padding:0.6rem 1rem;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.06);color:#eef2ff;"
-            onmousedown="event.preventDefault()"
-            onclick="loadTrainerProfile('${u.username.replace(/'/g, "\\'")}')"
-            onmouseover="this.style.background='rgba(255,255,255,0.08)'"
-            onmouseout="this.style.background=''">
-          <strong>${u.name}</strong> <span style="color:#a5b4d4;">@${u.username}</span>
+      suggestions.innerHTML = data.map((u) => `
+        <li style="border-bottom:1px solid rgba(255,255,255,0.06);">
+          <button type="button" data-trainer-username="${escapeHtml(u.username)}"
+            style="padding:0.6rem 1rem;cursor:pointer;color:#eef2ff;background:transparent;border:0;width:100%;text-align:left;">
+            <strong>${escapeHtml(u.name)}</strong> <span style="color:#a5b4d4;">@${escapeHtml(u.username)}</span>
+          </button>
         </li>
       `).join("");
+      suggestions.querySelectorAll("[data-trainer-username]").forEach((button) => {
+        button.addEventListener("mousedown", (event) => event.preventDefault());
+        button.addEventListener("click", () => {
+          void loadTrainerProfile(button.dataset.trainerUsername || "");
+        });
+        button.addEventListener("mouseover", () => {
+          button.style.background = "rgba(255,255,255,0.08)";
+        });
+        button.addEventListener("mouseout", () => {
+          button.style.background = "transparent";
+        });
+      });
       suggestions.style.display = "block";
     }, 250);
   });
@@ -574,8 +635,8 @@ async function loadTrainerProfile(username) {
 
   grid.innerHTML = withImages.map(c => `
     <div class="card-shell">
-      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
-      <div><h3>${c.card_name}</h3><p class="muted">${c.type} · ${c.level}</p></div>
+      <img src="${safeImageUrl(c.imageURL)}" alt="${escapeHtml(c.card_name)}" style="width:120px;border-radius:12px;" />
+      <div><h3>${escapeHtml(c.card_name)}</h3><p class="muted">${escapeHtml(c.type)} · ${escapeHtml(c.level)}</p></div>
     </div>
   `).join("");
 }
@@ -592,7 +653,7 @@ async function loadPacks() {
     return;
   }
   if (data.error) {
-    grid.innerHTML = `<p class="muted">${String(data.error)}</p>`;
+    grid.innerHTML = `<p class="muted">${escapeHtml(String(data.error))}</p>`;
     return;
   }
   if (!Array.isArray(data) || data.length === 0) {
@@ -603,14 +664,20 @@ async function loadPacks() {
 
   grid.innerHTML = data.map(pack => `
     <div class="card-shell">
-      <div class="card-image">${pack.pack_type_name}</div>
+      <div class="card-image">${escapeHtml(pack.pack_type_name)}</div>
       <div style="margin-top:auto;">
-        <h3 style="margin-bottom:0.4rem;">${pack.pack_type_name}</h3>
-        <div class="card-meta" style="margin-bottom:0.75rem;"><span>${pack.pack_price} coins</span></div>
-        <button onclick="openPack('${pack.pack_type_id}')">Open Pack</button>
+        <h3 style="margin-bottom:0.4rem;">${escapeHtml(pack.pack_type_name)}</h3>
+        <div class="card-meta" style="margin-bottom:0.75rem;"><span>${escapeHtml(pack.pack_price)} coins</span></div>
+        <button type="button" data-pack-type-id="${escapeHtml(pack.pack_type_id)}">Open Pack</button>
       </div>
     </div>
   `).join("");
+
+  grid.querySelectorAll("[data-pack-type-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      void openPack(button.dataset.packTypeId || "");
+    });
+  });
 }
 
 async function openPack(packTypeId) {
@@ -638,10 +705,10 @@ async function openPack(packTypeId) {
 
   results.innerHTML = withImages.map(c => `
     <div class="card-shell">
-      <img src="${c.imageURL}" alt="${c.card_name}" style="width:120px;border-radius:12px;" />
+      <img src="${safeImageUrl(c.imageURL)}" alt="${escapeHtml(c.card_name)}" style="width:120px;border-radius:12px;" />
       <div>
-        <h3>${c.card_name}</h3>
-        <p class="muted">${c.type} · ${c.level}</p>
+        <h3>${escapeHtml(c.card_name)}</h3>
+        <p class="muted">${escapeHtml(c.type)} · ${escapeHtml(c.level)}</p>
       </div>
     </div>
   `).join("");

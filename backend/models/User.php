@@ -7,6 +7,19 @@ class User {
     }
 
     public function register($username, $name, $password) {
+        if (!preg_match('/^[A-Za-z0-9_.-]{3,32}$/', $username)) {
+            http_response_code(400);
+            return false;
+        }
+        if (mb_strlen($name) < 1 || mb_strlen($name) > 255) {
+            http_response_code(400);
+            return false;
+        }
+        if (strlen($password) < 8) {
+            http_response_code(400);
+            return false;
+        }
+
         if ($this->findByUsername($username)) {
             return false;
         }

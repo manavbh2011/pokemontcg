@@ -38,6 +38,28 @@ class Market {
         return $result;
     }
 
+    public function getListingForUpdate($listingId) {
+        $stmt = $this->pdo->prepare("
+            SELECT l.*, c.username AS seller
+            FROM listing l
+            JOIN card c ON l.card_id = c.card_id
+            WHERE l.listing_id = ?
+            FOR UPDATE
+        ");
+        $stmt->execute([$listingId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
+        return $result;
+    }
+
+    public function hasRecordedTransaction($listingId) {
+        $stmt = $this->pdo->prepare("SELECT transaction_id FROM `transaction` WHERE listing_id = ? LIMIT 1");
+        $stmt->execute([$listingId]);
+        $result = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        return $result !== false;
+    }
+
     public function recordTransaction($listingId, $seller, $buyer) {
         $stmt = $this->pdo->prepare("
             INSERT INTO `transaction` (listing_id, seller, buyer) VALUES (?, ?, ?)

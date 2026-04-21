@@ -9,6 +9,13 @@ class AuthController {
     }
 
     public function login($username, $password) {
+        $username = trim((string) $username);
+        $password = (string) $password;
+        if ($username === '' || $password === '') {
+            http_response_code(400);
+            return ["error" => "Username and password are required"];
+        }
+
         $adminUsername = getenv('ADMIN_USERNAME');
         $adminPassword = getenv('ADMIN_PASSWORD');
 
@@ -17,6 +24,7 @@ class AuthController {
                 http_response_code(401);
                 return ["error" => "Invalid username or password"];
             }
+            session_regenerate_id(true);
             $_SESSION['username'] = $adminUsername;
             $_SESSION['name']     = 'Admin';
             $_SESSION['is_admin'] = true;
@@ -35,8 +43,10 @@ class AuthController {
             return ["error" => "Invalid username or password"];
         }
 
+        session_regenerate_id(true);
         $_SESSION['username'] = $trainer['username'];
         $_SESSION['name']     = $trainer['name'];
+        unset($_SESSION['is_admin']);
 
         return [
             "username" => $trainer['username'],
@@ -46,10 +56,21 @@ class AuthController {
     }
 
     public function register($username, $name, $password) {
+        $username = trim((string) $username);
+        $name = trim((string) $name);
+        $password = (string) $password;
+        if ($username === '' || $name === '' || $password === '') {
+            http_response_code(400);
+            return ["error" => "Username, name, and password are required"];
+        }
+
         $registered = $this->userModel->register($username, $name, $password);
         if (!$registered) {
-            http_response_code(409);
-            return ["error" => "Username already taken"];
+            if (http_response_code() === 200) {
+                http_response_code(409);
+                return ["error" => "Username already taken"];
+            }
+            return ["error" => "Registration failed"];
         }
         return ["success" => true];
     }
@@ -75,6 +96,11 @@ class AuthController {
     }
 
     public function logout() {
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], (bool) $params['secure'], (bool) $params['httponly']);
+        }
         session_destroy();
         return ["message" => "Logged out"];
     }

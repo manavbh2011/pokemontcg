@@ -58,6 +58,7 @@ class Showcase {
             JOIN card c ON sc.card_id = c.card_id
             JOIN card_info ci ON c.card_info_id = ci.card_info_id
             WHERE sc.showcase_id = ?
+            ORDER BY ci.card_name
         ");
         $stmt->execute([$showcaseId]);
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
