@@ -81,7 +81,8 @@ CREATE TABLE IF NOT EXISTS listing (
    listing_id INT AUTO_INCREMENT PRIMARY KEY,
    card_id INT NOT NULL,
    listing_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   card_price DECIMAL(10, 2) NOT NULL
+   card_price DECIMAL(10, 2) NOT NULL,
+   FOREIGN KEY (card_id) REFERENCES `card`(card_id)
 );
 
 
@@ -91,6 +92,7 @@ CREATE TABLE IF NOT EXISTS `transaction` (
    card_purchase_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    seller VARCHAR(255) NOT NULL,
    buyer VARCHAR(255) NOT NULL,
+   UNIQUE KEY unique_listing_transaction (listing_id),
    FOREIGN KEY (listing_id) REFERENCES listing(listing_id),
    FOREIGN KEY (seller) REFERENCES trainer(username),
    FOREIGN KEY (buyer) REFERENCES trainer(username)
