@@ -136,3 +136,11 @@ ALTER TABLE listing
 ALTER TABLE `transaction`
   ADD CONSTRAINT chk_transaction_buyer_ne_seller
     CHECK (buyer <> seller);
+
+-- card_info: HP must be non-negative, not positive, oops
+ALTER TABLE card_info
+  DROP CONSTRAINT chk_card_hp_positive;
+
+ALTER TABLE card_info
+  ADD CONSTRAINT chk_card_hp_not_negative
+    CHECK (hp >= 0);
